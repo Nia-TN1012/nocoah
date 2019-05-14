@@ -5,8 +5,8 @@ require_relative '../identity'
 # Nocoah
 module Nocoah
 
-    # Services
-    module Services
+    # Client
+    module Client
 
         # Base
         class Base

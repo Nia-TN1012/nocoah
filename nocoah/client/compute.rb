@@ -9,8 +9,8 @@ require_relative '../types/compute'
 # Nocoah
 module Nocoah
 
-    # Services
-    module Services
+    # Client
+    module Client
 
         # Compute API
         class Compute < Base

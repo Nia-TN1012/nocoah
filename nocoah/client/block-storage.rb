@@ -8,8 +8,8 @@ require_relative '../types/block-storage'
 # Nocoah
 module Nocoah
 
-    # Services
-    module Services
+    # Client
+    module Client
 
         # Block Storage API
         class BlockStorage < Base

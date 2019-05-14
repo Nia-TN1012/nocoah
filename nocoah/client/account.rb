@@ -8,8 +8,8 @@ require_relative '../types/account'
 # Nocoah
 module Nocoah
 
-    # Services
-    module Services
+    # Client
+    module Client
 
         # ConoHa account API.
         class Account < Base
