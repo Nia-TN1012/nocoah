@@ -1,0 +1,7 @@
+require_relative './errors'
+require_relative './config'
+require_relative './identity'
+require_relative './services/base'
+require_relative './services/account'
+require_relative './services/compute'
+require_relative './services/block-storage'
