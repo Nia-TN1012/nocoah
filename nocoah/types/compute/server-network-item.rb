@@ -23,13 +23,7 @@ module Nocoah
                 # @param [Array<Hash>]  addresses           IP addresses
                 def initialize( network_label, addresses )
                     @network_label = network_label
-                    if addresses.kind_of?( Array )
-                        @addresses = addresses.map do | address |
-                            ServerAddressItem.new( address )
-                        end
-                    else
-                        @addresses = []
-                    end
+                    @addresses = addresses.map { | address | ServerAddressItem.new( address ) } rescue []
                 end
 
                 def to_s

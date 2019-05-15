@@ -1,4 +1,3 @@
-require 'date'
 require_relative '../common'
 require_relative './fixed-ip-address'
 
@@ -26,13 +25,7 @@ module Nocoah
                 attr_reader :port_state
 
                 def initialize( data )
-                    if data.key?( 'fixed_ips' )
-                        @fixed_ips = data['fixed_ips'].map do | ip |
-                            FixedIPAddress.new( ip )
-                        end
-                    else
-                        @fixed_ips = []
-                    end
+                    @fixed_ips = data['fixed_ips'].map { | ip | FixedIPAddress.new( ip ) } rescue []
                     @mac_addr = data['mac_addr']
                     @net_id = data['net_id']
                     @port_id = data['port_id']

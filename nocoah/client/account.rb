@@ -17,7 +17,7 @@ module Nocoah
             # Account API Endpoint ( '%s' contains a string representing the region. (e.q. 'tyo1', 'sin1' or 'sjc1') )
             ENDPOINT_BASE = "https://account.%s.conoha.io/v1"
 
-            # Gets ordered items list.
+            # Gets a ordered items list.
             #
             # @return [Array<Nocoah::Types::Account::OrderItem>]    When succeeded, ordered items list.
             # @raise [Nocoah::APIError]                             When failed.
@@ -41,7 +41,7 @@ module Nocoah
                 end
             end
 
-            # Gets ordered items info.
+            # Gets a ordered items info.
             #
             # @param [String] item_id       Item ID
             #
@@ -65,7 +65,7 @@ module Nocoah
                 Types::Account::OrderItemDetail.new( json_data['order_item'] )
             end
 
-            # Gets payment history.
+            # Gets a payment history.
             #
             # @return [Array<Nocoah::Types::Account::PaymentHistoryItem>]   When succeeded, payment history.
             # @raise [Nocoah::APIError]                                     When failed.
@@ -89,7 +89,7 @@ module Nocoah
                 end
             end
 
-            # Gets payment summary.
+            # Gets a payment summary.
             #
             # @return [Nocoah::Types::Account::PaymentSummary]  When succeeded, payment summary.
             # @raise [Nocoah::APIError]                         When failed.
@@ -111,7 +111,7 @@ module Nocoah
                 Types::Account::PaymentSummary.new( json_data['payment_summary'] )
             end
 
-            # Gets billing invoices list.
+            # Gets a billing invoices list.
             #
             # @param [Integer] offset   Acquisition start position
             # @param [Integer] limit    Acquisition number
@@ -138,7 +138,7 @@ module Nocoah
                 end
             end
 
-            # Gets billing invoice detail list.
+            # Gets a billing invoice detail list.
             #
             # @param [String] invoice_id   Invoice ID
             #
@@ -164,7 +164,7 @@ module Nocoah
                 end
             end
 
-            # Gets notifications list.
+            # Gets a notifications list.
             #
             # @param [Integer] offset   Acquisition start position
             # @param [Integer] limit    Acquisition number
@@ -191,7 +191,7 @@ module Nocoah
                 end
             end
 
-            # Gets notification item.
+            # Gets a notification item.
             #
             # @param [String] notification_code   Notification code
             #
@@ -215,7 +215,7 @@ module Nocoah
                 Types::Account::NotificationItem.new( json_data['notification'] )
             end
 
-            # Sets read status of notification
+            # Sets read status of the notification
             #
             # @param [String]   notification_code   Notification code
             # @param [String]   read_status         Read / Unread status ( You can specify the enumerator of {Nocoah::Types::Account::ReadStatus} as an alias. )
@@ -245,7 +245,7 @@ module Nocoah
                 Types::Account::NotificationItem.new( json_data['notification'] )
             end
 
-            # Gets object storage request utilization rrd.
+            # Gets a object storage request utilization rrd.
             #
             # @param            [Hash]      url_query           Optional parameter
             # @option url_query [Integer]   start_date_raw      (1 day ago) Data acquisition start time (UNIX time)
@@ -262,7 +262,7 @@ module Nocoah
                 get_object_storage_rrd_core( "request", url_query )
             end
 
-            # Gets object storage size utilization rrd.
+            # Gets a object storage size utilization rrd.
             #
             # @param            [Hash]      url_query           Optional parameter
             # @option url_query [Integer]   start_date_raw      (1 day ago) Data acquisition start time (UNIX time)
@@ -281,7 +281,7 @@ module Nocoah
 
             private
 
-            # Gets object storage utilization rrd.
+            # Gets a object storage utilization rrd.
             #
             # @param            [String]    target_rrd          Target RRD ( 'request' or 'size' )
             # @param            [Hash]      url_query           Optional parameter

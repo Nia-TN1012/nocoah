@@ -14,6 +14,8 @@ module Nocoah
 
                 # @return [String] Attachment ID
                 attr_reader :attachment_id
+                # @return [String] Host name
+                attr_reader :host_name
                 # @return [String] Volume device
                 attr_reader :device
                 # @return [String] Attached server ID
@@ -23,6 +25,7 @@ module Nocoah
 
                 def initialize( data )
                     @attachment_id = data['id']
+                    @host_name = data['host_name']
                     @device = data['device']
                     @server_id = data['serverId']
                     @volume_id = data['volumeId']
@@ -31,6 +34,7 @@ module Nocoah
                 def to_s
                     {
                         'Attachment ID' => @attachment_id,
+                        'Host name' => @host_name,
                         'Device' => @device,
                         'Attached server ID' => @server_id,
                         'Attached volume ID' => @volume_id,

@@ -1,7 +1,7 @@
-require_relative './errors'
 require_relative './config'
 require_relative './identity'
 require_relative './client/base'
 require_relative './client/account'
 require_relative './client/compute'
 require_relative './client/block-storage'
+require_relative './client/image'

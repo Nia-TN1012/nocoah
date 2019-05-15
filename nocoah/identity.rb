@@ -70,7 +70,7 @@ module Nocoah
             get_token
         end
 
-        # Gets Identity API version info.
+        # Gets a Identity API version info.
         #
         # @return [Hash]                When succeeded, API verion info.
         # @raise [Nocoah::APIError]     When failed.
@@ -78,7 +78,7 @@ module Nocoah
             Identity.version( @config.region )
         end
 
-        # Gets ConoHa API token.
+        # Gets a ConoHa API token.
         #
         # @raise [Nocoah::APIError]     When failed.
         #

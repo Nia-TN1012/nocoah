@@ -1,5 +1,5 @@
+require 'date'
 require_relative './image-item'
-require_relative './image-metadata'
 
 # Nocoah
 module Nocoah
@@ -27,7 +27,7 @@ module Nocoah
                 attr_reader :minDisk
                 # @return [Integer] A percentage value of the image save progress
                 attr_reader :progress
-                # @return [Nocoah::Types::Compute::ImageMetadata] Image metadata
+                # @return [Hash] Image metadata
                 attr_reader :metadata
                 
                 def initialize( data )
@@ -40,7 +40,7 @@ module Nocoah
                     @minRam = data['minRam']
                     @minDisk = data['minDisk']
                     @progress = data['progress']
-                    @metadata = data['metadata'].nil? ? nil : ImageMetadata.new( data['metadata'] )
+                    @metadata = data['metadata']
                 end
 
                 def to_s
@@ -55,7 +55,7 @@ module Nocoah
                         'Min RAM' => "#{@minRam} MiB",
                         'Min disk space' => "#{minDisk} GiB",
                         'Save progress' => @progress,
-                        'Metadata' => @metadata.to_s,
+                        'Metadata' => @metadata,
                     }.to_s
                 end
 

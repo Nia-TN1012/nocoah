@@ -34,7 +34,7 @@ module Nocoah
                 return false if val.nil?
                 return val if val.is_a?( TrueClass ) || val.is_a?( FalseClass )
                 return false unless val.is_a?( String )
-
+                
                 val =~ /^true$/i ? true : false
             end
 

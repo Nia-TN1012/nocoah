@@ -1,4 +1,3 @@
-require 'date'
 require_relative '../common'
 
 # Nocoah
@@ -23,14 +22,7 @@ module Nocoah
                 def initialize( data )
                     @flavor_id = data['id']
                     @name = data['name']
-                    if data.key?( 'links' )
-                        @links = data['links'].map() do | link |
-                            Common::Link.new( link['href'], link['rel'] )
-                        end
-                    else
-                        @links = []
-                    end
-
+                    @links = data['links'].map { | link | Common::Link.new( link['href'], link['rel'] ) } rescue []
                 end
 
                 def to_s

@@ -72,7 +72,7 @@ module Nocoah
 
         private
 
-        # Loads config file.
+        # Loads the config file.
         # 
         # @param [String] config_file_path   Config file path
         def load_config_file( config_file_path )

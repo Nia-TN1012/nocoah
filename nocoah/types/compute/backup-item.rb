@@ -22,13 +22,7 @@ module Nocoah
                 def initialize( data )
                     @backup_id = data['id']
                     @instance_id = data['instance_id']
-                    if data.key?( 'backupruns' )
-                        @backupruns = data['backupruns'].map do | backuprun |
-                            BackupRunItem.new( backuprun )
-                        end
-                    else
-                        @backupruns = []
-                    end
+                    @backupruns = data['backupruns'].map { | backuprun | BackupRunItem.new( backuprun ) } rescue []
                 end
 
                 def to_s

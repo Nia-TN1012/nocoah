@@ -44,7 +44,7 @@ module Nocoah
                 @endpoint = sprintf( self.class::ENDPOINT_BASE, @identity.config.region )
             end
 
-            # Get API version info.
+            # Get a API version info.
             #
             # @return [Hash]                When succeeded, API version info.
             # @raise [Nocoah::APIError]     When failed.

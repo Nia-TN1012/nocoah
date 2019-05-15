@@ -18,7 +18,7 @@ module Nocoah
             # Compute API Endpoint ( '%s' contains a string representing the region. (e.q. 'tyo1', 'sin1' or 'sjc1') )
             ENDPOINT_BASE = "https://compute.%s.conoha.io/v2"
 
-            # Gets virtual machine template ( flavor ) list.
+            # Gets a virtual machine template ( flavor ) list.
             #
             # @param            [Hash]      url_query    Options
             # @option url_query [Integer]   min_disk     Filter by minimum disk size (GB)
@@ -37,11 +37,11 @@ module Nocoah
                 return [] unless json_data.key?( 'flavors' )
 
                 json_data['flavors'].map() do | flavor |
-                    Nocoah::Types::Compute::FlavorItem.new( flavor )
+                    Types::Compute::FlavorItem.new( flavor )
                 end
             end
 
-            # Gets virtual machine template ( flavor ) detail list.
+            # Gets a virtual machine template ( flavor ) detail list.
             #
             # @param            [Hash]      url_query   Options
             # @option url_query [Integer]   min_disk    Filter by minimum disk size (GB)
@@ -60,15 +60,15 @@ module Nocoah
                 return [] unless json_data.key?( 'flavors' )
 
                 json_data['flavors'].map() do | flavor |
-                    Nocoah::Types::Compute::FlavorItemDetail.new( flavor )
+                    Types::Compute::FlavorItemDetail.new( flavor )
                 end
             end
 
-            # Gets virtual machine template ( flavor ) detail info.
+            # Gets a virtual machine template ( flavor ) detail item.
             #
             # @param [String] flavor_id     Flavor ID
             #
-            # @return [Nocoah::Types::Compute::FlavorItemDetail]    When succeeded, flavor detail info.
+            # @return [Nocoah::Types::Compute::FlavorItemDetail]    When succeeded, flavor detail item.
             # @raise [Nocoah::APIError]                             When failed.
             #
             # @see get_flavor_list
@@ -83,15 +83,15 @@ module Nocoah
 
                 http_client = HTTPClient.new;
                 res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/flavors/#{flavor_id}", header: headers )
-                raise APIError, message: "Failed to get flavor (flavor_id: #{flavor_id}) detail info.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
+                raise APIError, message: "Failed to get flavor (flavor_id: #{flavor_id}) detail item.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
                 json_data = JSON.parse( res.body )
                 return nil unless json_data.key?( 'flavor' )
 
-                Nocoah::Types::Compute::FlavorItemDetail.new( json_data['flavor'] )
+                Types::Compute::FlavorItemDetail.new( json_data['flavor'] )
             end
 
-            # Gets virtual machine list.
+            # Gets a virtual machine list.
             #
             # @param            [Hash]      url_query       Options
             # @option url_query [DateTime]  changes-since   Virtual machine list ( including deleted ) from specified time
@@ -116,11 +116,11 @@ module Nocoah
                 return [] unless json_data.key?( 'servers' )
 
                 json_data['servers'].map() do | server |
-                    Nocoah::Types::Compute::ServerItem.new( server )
+                    Types::Compute::ServerItem.new( server )
                 end
             end
 
-            # Gets virtual machine detail list.
+            # Gets a virtual machine detail list.
             #
             # @param            [Hash]      url_query       Options
             # @option url_query [DateTime]  changes-since   Virtual machine list ( including deleted ) from specified time
@@ -145,15 +145,15 @@ module Nocoah
                 return [] unless json_data.key?( 'servers' )
 
                 json_data['servers'].map() do | server |
-                    Nocoah::Types::Compute::ServerItemDetail.new( server )
+                    Types::Compute::ServerItemDetail.new( server )
                 end
             end
 
-            # Gets virtual machine detail.
+            # Gets a virtual machine detail item.
             #
             # @param [String] server_id     Server ID
             #
-            # @return [Nocoah::Types::Compute::ServerDetailItem]    When succeeded, server detail info.
+            # @return [Nocoah::Types::Compute::ServerDetailItem]    When succeeded, server detail item.
             # @raise [Nocoah::APIError]                             When failed.
             #
             # @see get_server_list
@@ -168,15 +168,15 @@ module Nocoah
 
                 http_client = HTTPClient.new;
                 res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}", header: headers )
-                raise APIError, message: "Failed to get server (server_id: #{server_id}) detail info.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
+                raise APIError, message: "Failed to get server (server_id: #{server_id}) detail item.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
                 json_data = JSON.parse( res.body )
                 return nil unless json_data.key?( 'server' )
 
-                Nocoah::Types::Compute::ServerItemDetail.new( json_data['server'] )
+                Types::Compute::ServerItemDetail.new( json_data['server'] )
             end
 
-            # Gets image list.
+            # Gets a image list.
             #
             # @param            [Hash]      url_query       Options
             # @option url_query [DateTime]  changes-since   Image list ( including deleted ) from specified time
@@ -200,11 +200,11 @@ module Nocoah
                 return [] unless json_data.key?( 'images' )
 
                 json_data['images'].map() do | image |
-                    Nocoah::Types::Compute::ImageItem.new( image )
+                    Types::Compute::ImageItem.new( image )
                 end
             end
 
-            # Gets image detail list.
+            # Gets a image detail list.
             #
             # @param            [Hash]      url_query       Options
             # @option url_query [DateTime]  changes-since   Image list ( including deleted ) from specified time
@@ -228,15 +228,15 @@ module Nocoah
                 return [] unless json_data.key?( 'images' )
 
                 json_data['images'].map() do | image |
-                    Nocoah::Types::Compute::ImageItemDetail.new( image )
+                    Types::Compute::ImageItemDetail.new( image )
                 end
             end
 
-            # Gets image detail.
+            # Gets a image detail item.
             #
             # @param [String] image_id      Image ID
             #
-            # @return [Nocoah::Types::Compute::ImageItemDetail]     When succeeded, image detail info.
+            # @return [Nocoah::Types::Compute::ImageItemDetail]     When succeeded, image detail item.
             # @raise [Nocoah::APIError]                             When failed.
             #
             # @see get_image_list
@@ -251,30 +251,31 @@ module Nocoah
 
                 http_client = HTTPClient.new;
                 res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/images/#{image_id}", header: headers )
-                raise APIError, message: "Failed to get image (image_id: #{image_id}) detail info.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
+                raise APIError, message: "Failed to get image (image_id: #{image_id}) detail item.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
                 json_data = JSON.parse( res.body )
                 return nil unless json_data.key?( 'image' )
 
-                Nocoah::Types::Compute::ImageItemDetail.new( json_data['image'] )
+                Types::Compute::ImageItemDetail.new( json_data['image'] )
             end
 
-            # Adds virtual machine
+            # Creates a new virtual machine
             #
-            # @param            [String]            image_id                Image ID
-            # @param            [String]            flavor_id               Flavor ID
-            # @param            [Hash]              options                 Optional settings
-            # @option options   [String]            adminPass               Root password
-            # @option options   [String]            key_name                SSH key name ( when using SSH key authentication )
-            # @option options   [Array<String>]     security_groups         Security groups names
-            # @option options   [String]            instance_name_tag       Virtual machine name tag
-            # @option options   [String]            volume_id               Addtional disk ID ( when using an additional disk )
-            # @option options   [String]            vncKeymap               Key map ( 'en-us' or 'ja' )
-            # @option options   [String]            startup_script          Startup script ( The contents are Base64 encoded. ) 
-            # @option options   [String]            startup_script_path     Startup script path ( The contents of the loaded file are Base64 encoded. )                
+            # @param            [String]            image_id                    Image ID
+            # @param            [String]            flavor_id                   Flavor ID
+            # @param            [Hash]              options                     Optional settings
+            # @option options   [String]            adminPass                   (nil) Root password
+            # @option options   [String]            key_name                    (nil) SSH key name ( when using SSH key authentication )
+            # @option options   [Array<String>]     security_groups             (nil) Security groups names
+            # @option options   [String]            instance_name_tag           (nil) Virtual machine name tag
+            # @option options   [String]            volume_id                   (nil) Addtional disk ID ( when using an additional disk )
+            # @option options   [String]            vncKeymap                   (nil) Key map ( 'en-us' or 'ja' )
+            # @option options   [String]            startup_script              (nil) Startup script
+            # @option options   [String]            startup_script_path         (nil) Startup script file path 
+            # @option options   [Boolean]           encode_startup_script       (false) When true, encode the startup script specified in the argument into Base64 format.
             #
-            # @return [Array<Nocoah::Types::Compute::ServerBuildResult>]    When succeeded, Added virtual machine info.
-            # @raise [Nocoah::APIError]                                     When failed.
+            # @return [Nocoah::Types::Compute::CreateServerResult]      When succeeded, created virtual machine item.
+            # @raise [Nocoah::APIError]                                 When failed.
             #
             # @note If both startup_script and startup_script_path are specified, only startup_script is used.
             # @note Startup script can be specified up to 16KiB without being encoded.
@@ -284,41 +285,41 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-create_vm.html
             # @see https://support.conoha.jp/v/startupscript/
             # @see https://developer.openstack.org/api-ref/compute/?expanded=create-server-detail#create-server
-            def add_server( image_id:, flavor_id:, **options )
+            def create_server( image_id:, flavor_id:, **options )
+                server_options = {
+                    imageRef: image_id,
+                    flavorRef: flavor_id
+                }
+                server_options[:adminPass] = options[:adminPass] if options.key?( :adminPass )
+                server_options[:key_name] = options[:key_name] if options.key?( :key_name )
+                server_options[:vncKeymap] = options[:vncKeymap] if options.key?( :vncKeymap )
+
                 # Security group
                 if options.key?( :security_groups ) && !options[:security_groups].empty?
-                    security_groups = options[:security_groups].map do | sg |
+                    server_options[:security_groups] = options[:security_groups].map do | sg |
                         { name: sg }
                     end
-                else
-                    security_groups = nil
                 end
 
                 # Metadata
                 if options.key?( :instance_name_tag )
-                    metadata = {
+                    server_options[:metadata] = {
                         instance_name_tag: options[:instance_name_tag]
                     }
-                else
-                    metadata = nil
                 end
 
                 # Additional disk
                 if options.key?( :volume_id )
-                    block_device_mapping = [{
+                    server_options[:block_device_mapping] = [{
                         volume_id: options[:volume_id]
                     }]
-                else
-                    block_device_mapping = nil
                 end
 
                 # Startup script
                 if options.key?( :startup_script )
-                    user_data = Base64.encode64( options[:startup_script] )
+                    server_options[:user_data] = Types::Common.to_b( options['encode_startup_script'] ) ? Base64.encode64( options[:startup_script] ) : options[:startup_script]
                 elsif options.key?( :startup_script_path ) && File.exist?( options[:startup_script_path] )
-                    user_data = Base64.encode64( File.read( options[:startup_script_path] ) )
-                else
-                    user_data = nil
+                    server_options[:user_data] = Types::Common.to_b( options['encode_startup_script'] ) ? Base64.encode64( File.read( options[:startup_script_path] ) ) : File.read( options[:startup_script_path] )
                 end
 
                 headers = {
@@ -326,33 +327,27 @@ module Nocoah
                     'X-Auth-Token': @identity.api_token
                 }
                 body = {
-                    server: {
-                        imageRef: image_id,
-                        flavorRef: flavor_id
-                    }
+                    server: server_options
                 }
-                body[:adminPass] = options[:adminPass] if options.key?( :adminPass )
-                body[:key_name] = options[:key_name] if options.key?( :key_name )
-                body[:security_groups] = security_groups if security_groups != nil
-                body[:metadata] = metadata if metadata != nil
-                body[:block_device_mapping] = block_device_mapping if block_device_mapping != nil
-                body[:vncKeymap] = options[:vncKeymap] if options.key?( :vncKeymap )
-                body[:user_data] = user_data if user_data != nil
                 
                 http_client = HTTPClient.new;
                 res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers", header: headers, body: body.to_json )
                 raise APIError, message: "Failed to add virtual machine (image_id: #{image_id}, flavor_id: #{flavor_id}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
                 json_data = JSON.parse( res.body )
+                return nil unless json_data.key?( 'server' )
 
+                Types::Compute::CreateServerResult.new( json_data['server'] )
             end
 
-            # Deletes virtual machine
+            # Deletes the virtual machine.
             #
             # @param [String]   server_id   Server ID               
             #
             # @return [String]              When succeeded, Deleted virtual machine server ID.
             # @raise [Nocoah::APIError]     When failed.
+            #
+            # @note ConoHa: (IMPORTANT) Please note that even if Delete-Lock is enabled in the control panel, it will be deleted.
             # 
             # @see https://www.conoha.jp/docs/compute-delete_vm.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=delete-server-detail#delete-server
@@ -369,7 +364,7 @@ module Nocoah
                 server_id
             end
 
-            # Launches virtual machine
+            # Launches the virtual machine
             #
             # @param [String]   server_id   Server ID               
             #
@@ -382,7 +377,7 @@ module Nocoah
                 server_action_core( server_id, "launch" )
             end
 
-            # Restarts virtual machine
+            # Restarts the virtual machine
             #
             # @param [String]   server_id   Server ID               
             #
@@ -395,7 +390,7 @@ module Nocoah
                 server_action_core( server_id, "restart" )
             end
 
-            # Stops virtual machine
+            # Stops the virtual machine
             #
             # @param [String]   server_id   Server ID
             # @param [Boolean]  is_force    Whether to force stop       
@@ -410,7 +405,7 @@ module Nocoah
                 server_action_core( server_id, is_force ? "force-stop" : "stop" )
             end
 
-            # Rebuilds virtual machine
+            # Rebuilds the virtual machine.
             #
             # @param            [String]    server_id   Server ID
             # @param            [String]    image_id    Image ID
@@ -418,32 +413,37 @@ module Nocoah
             # @option options   [String]    adminPass   Root password
             # @option options   [String]    key_name    SSH key name ( when using SSH key authentication )               
             #
-            # @return [Array<Nocoah::Types::Compute::ServerBuildResult>]    When succeeded, Rebuilt virtual machine info.
-            # @raise [Nocoah::APIError]                                     When failed.
+            # @return [Nocoah::Types::Compute::RebuildServerResult]     When succeeded, rebuilt virtual machine item.
+            # @raise [Nocoah::APIError]                                 When failed.
             #
             # @see https://www.conoha.jp/docs/compute-re_install.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=rebuild-server-rebuild-action-detail#rebuild-server-rebuild-action
-            def rebuild_server( server_id, image_id, **options )
+            def rebuild_server( server_id, image_id:, **options )
+                rebuild_options = {
+                    imageRef: image_id
+                }
+                rebuild_options[:adminPass] = options[:adminPass] if options.key?( :adminPass )
+                rebuild_options[:key_name] = options[:key_name] if options.key?( :key_name )
+
                 headers = {
                     Accept: "application/json",
                     'X-Auth-Token': @identity.api_token
                 }
                 body = {
-                    rebuild: {
-                        imageRef: image_id
-                    }
+                    rebuild: rebuild_options
                 }
-                body[:adminPass] = options[:adminPass] if options.key?( :adminPass )
-                body[:key_name] = options[:key_name] if options.key?( :key_name )
                 
                 http_client = HTTPClient.new;
                 res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body.to_json )
                 raise APIError, message: "Failed to rebuild virtual machine (server_id: #{server_id}, image_id: #{image_id}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
                 json_data = JSON.parse( res.body )
+                return nil unless json_data.key?( 'server' )
+
+                Types::Compute::RebuildServerResult.new( json_data['server'] )
             end
 
-            # Resizes virtual machine
+            # Resizes the virtual machine
             #
             # @param [String]    server_id   Server ID
             # @param [String]    flavor_id   Flavor ID          
@@ -476,7 +476,7 @@ module Nocoah
                 server_id
             end
 
-            # Confirms resize virtual machine
+            # Confirms resize the virtual machine
             #
             # @param [String]    server_id   Server ID
             #
@@ -505,7 +505,7 @@ module Nocoah
                 server_id
             end
 
-            # Reverts resize virtual machine
+            # Reverts resize the virtual machine
             #
             # @param [String]    server_id   Server ID
             #
@@ -547,7 +547,7 @@ module Nocoah
                 get_console_url_core( server_id, target_console: { :'os-getVNCConsole' => { :type => "novnc" } } )
             end
 
-            # Gets the connection URL of web serial console.
+            # Gets a connection URL of web serial console.
             #
             # @param [String]    server_id   Server ID
             #
@@ -560,7 +560,7 @@ module Nocoah
                 get_console_url_core( server_id, target_console: { :'os-getSerialConsole' => { :type => "serial" } } )
             end
 
-            # Gets the connection URL of web serial console (HTTP).
+            # Gets a connection URL of web serial console (HTTP).
             #
             # @param [String]    server_id   Server ID
             #
@@ -572,7 +572,7 @@ module Nocoah
                 get_console_url_core( server_id, target_console: { :'os-getWebConsole' => { :type => "serial" } } )
             end
 
-            # Gets the connection URL of web serial console.
+            # Gets a connection URL of web serial console.
             #
             # @param [String]    server_id   Server ID
             #
@@ -585,7 +585,7 @@ module Nocoah
                 get_console_url_core( server_id, target_console: { :'os-getSerialConsole' => { :type => "serial" } } )
             end
 
-            # Creates server image.
+            # Creates a server image.
             #
             # @param [String]   server_id       Server ID
             # @param [String]   image_name      Image name  
@@ -593,7 +593,7 @@ module Nocoah
             # @return [String]              When succeeded, server ID.
             # @raise [Nocoah::APIError]     When failed.
             #
-            # @note Virtual machine must be stopped.
+            # @note Target virtual machine must be stopped.
             #
             # @see https://www.conoha.jp/docs/compute-create_image.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=create-image-createimage-action-detail#create-image-createimage-action
@@ -606,80 +606,88 @@ module Nocoah
                     createImage: {
                         name: image_name
                     }
-                }.to_json
+                }
 
                 http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body )
+                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body.to_json )
                 raise APIError, message: "Failed to create server image (server_id: #{server_id}, image_name: #{image_name}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
 
                 server_id
             end
 
-            # Changes storage controller.
+            # Changes the storage controller.
             #
             # @param [String]   server_id       Server ID
-            # @param [String]   hwDiskBus       Disk bus ( "virtio", "scsi" or "ide" )
+            # @param [String]   hw_disk_bus     Disk bus ( "virtio", "scsi" or "ide" )
+            #
+            # @note Target virtual machine must be stopped.
             #
             # @return [String]              When succeeded, server ID.
             # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/compute-hw_disk_bus.html
-            def change_storage_controller( server_id, hwDiskBus: "virtio" )
-                change_vm_hardware_core( server_id, target_hw: { hwDiskBus: hwDiskBus } )
+            def change_storage_controller( server_id, hw_disk_bus: "virtio" )
+                change_vm_hardware_core( server_id, target_hw: { hwDiskBus: hw_disk_bus } )
             end
 
-            # Changes network adapter.
+            # Changes the network adapter.
             #
-            # @param [String]   server_id       Server ID
-            # @param [String]   hwVifModel      Network adapter ( "e1000", "virtio" or "rtl8139" )
+            # @param [String]   server_id           Server ID
+            # @param [String]   hw_vif_model        Network adapter ( "e1000", "virtio" or "rtl8139" )
+            #
+            # @note Target virtual machine must be stopped.
             #
             # @return [String]              When succeeded, server ID.
             # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/compute-hw_vif_model.html
-            def change_network_adapter( server_id, hwVifModel: "virtio" )
-                change_vm_hardware_core( server_id, target_hw: { hwVifModel: hwVifModel } )
+            def change_network_adapter( server_id, hw_vif_model: "virtio" )
+                change_vm_hardware_core( server_id, target_hw: { hwVifModel: hw_vif_model } )
             end
 
-            # Changes video device.
+            # Changes the video device.
             #
-            # @param [String]   server_id       Server ID
-            # @param [String]   hwVideoModel    Video device ( "qxl", "vga" or "cirrus" )
+            # @param [String]   server_id           Server ID
+            # @param [String]   hw_video_model      Video device ( "qxl", "vga" or "cirrus" )
+            #
+            # @note Target virtual machine must be stopped.
             #
             # @return [String]              When succeeded, server ID.
             # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/compute-hw_video_model.html
-            def change_video_device( server_id, hwVideoModel: "vga" )
-                change_vm_hardware_core( server_id, target_hw: { hwVideoModel: hwVideoModel } )
+            def change_video_device( server_id, hw_video_model: "vga" )
+                change_vm_hardware_core( server_id, target_hw: { hwVideoModel: hw_video_model } )
             end
 
-            # Changes console key map.
+            # Changes the console key map.
             #
             # @param [String]   server_id       Server ID
-            # @param [String]   vncKeymap       Video device ( "en-us" or "js" )
+            # @param [String]   vnc_keymap      Video device ( "en-us" or "ja" )
+            #
+            # @note Target virtual machine must be stopped.
             #
             # @return [String]              When succeeded, server ID.
             # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/compute-vnc_key_map.html
-            def change_key_map( server_id, vncKeymap: )
+            def change_key_map( server_id, vnc_keymap: )
                 headers = {
                     Accept: "application/json",
                     'X-Auth-Token': @identity.api_token
                 }
                 body = {
-                    vncKeymap: vncKeymap
+                    vncKeymap: vnc_keymap
                 }
 
                 http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body )
-                raise APIError, message: "Failed to change console key map (server_id: #{server_id}, vncKeymap: #{vncKeymap}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
+                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body.to_json )
+                raise APIError, message: "Failed to change console key map (server_id: #{server_id}, vncKeymap: #{vnc_keymap}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
 
                 server_id
             end
 
-            # Mounts ISO image to virtual machine.
+            # Mounts a ISO image to virtual machine.
             #
             # @param [String]   server_id       Server ID
             # @param [String]   iso_path        ISO image file path
@@ -690,7 +698,7 @@ module Nocoah
             # @note Target virtual machine must be stopped.
             #
             # @see https://www.conoha.jp/docs/compute-insert_iso_image.html
-            def mount_iso( server_id, iso_path: )
+            def mount_iso_image( server_id, iso_path: )
                 headers = {
                     Accept: "application/json",
                     'X-Auth-Token': @identity.api_token
@@ -706,7 +714,7 @@ module Nocoah
                 server_id
             end
 
-            # Unmounts ISO image from virtual machine.
+            # Unmounts the ISO image from virtual machine.
             #
             # @param [String]   server_id       Server ID
             #
@@ -716,7 +724,7 @@ module Nocoah
             # @note Target virtual machine must be stopped.
             #
             # @see https://www.conoha.jp/docs/compute-eject_iso_image.html
-            def unmount_iso( server_id )
+            def unmount_iso_image( server_id )
                 headers = {
                     Accept: "application/json",
                     'X-Auth-Token': @identity.api_token
@@ -732,7 +740,7 @@ module Nocoah
                 server_id
             end
 
-            # Gets security group list assigned to virtual machine
+            # Gets a security group list assigned to the virtual machine
             #
             # @param [String]   server_id       Server ID
             #
@@ -753,7 +761,7 @@ module Nocoah
                 json_data = JSON.parse( res.body )
             end
 
-            # Gets key-pair list.
+            # Gets a key-pair list.
             #
             # @return [Array<Nocoah::Types::Compute::KeyPairItem>]      When succeeded, key-pair list.
             # @raise [Nocoah::APIError]                                 When failed.
@@ -775,13 +783,13 @@ module Nocoah
                 return [] unless json_data.key?( 'keypairs' )
 
                 json_data['keypairs'].map() do | keypair |
-                    Nocoah::Types::Compute::KeyPairItem.new( keypair['keypair'] )
+                    Types::Compute::KeyPairItem.new( keypair['keypair'] )
                 end
             end
 
-            # Gets key-pair detail info.
+            # Gets a key-pair detail item.
             #
-            # @return [Nocoah::Types::Compute::KeyPairItemDetail]       When succeeded, key-pair detail info.
+            # @return [Nocoah::Types::Compute::KeyPairItemDetail]       When succeeded, key-pair detail item.
             # @raise [Nocoah::APIError]                                 When failed.
             #
             # @see get_keypair_list
@@ -795,15 +803,15 @@ module Nocoah
 
                 http_client = HTTPClient.new;
                 res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/os-keypairs/#{keypair_name}", header: headers )
-                raise APIError, message: "Failed to get key-pair detail info (keypair_name: #{keypair_name}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
+                raise APIError, message: "Failed to get key-pair detail item (keypair_name: #{keypair_name}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
                 json_data = JSON.parse( res.body )
                 return nil unless json_data.key?( 'keypair' )
 
-                Nocoah::Types::Compute::KeyPairItemDetail.new( json_data['keypair'] )
+                Types::Compute::KeyPairItemDetail.new( json_data['keypair'] )
             end
 
-            # Adds key-pair.
+            # Adds a key-pair.
             #
             # @param [String]   keypair_name        Key-pair name
             # @param [String]   public_key          Public key ( When nil with public_key_path, the key is generated on the Nova side. )
@@ -840,10 +848,10 @@ module Nocoah
                 json_data = JSON.parse( res.body )
                 return nil unless json_data.key?( 'keypair' )
 
-                Nocoah::Types::Compute::AddKeyPairResult.new( json_data['keypair'] )
+                Types::Compute::AddKeyPairResult.new( json_data['keypair'] )
             end
 
-            # Deletes key-pair.
+            # Deletes the key-pair.
             #
             # @param [String]   keypair_name    Key-pair name
             #
@@ -865,7 +873,7 @@ module Nocoah
                 keypair_name
             end
 
-            # Gets attached volume list.
+            # Gets a attached volume list.
             #
             # @param [String]   server_id       Server ID
             #
@@ -889,11 +897,11 @@ module Nocoah
                 return [] unless json_data.key?( 'volumeAttachments' )
 
                 json_data['volumeAttachments'].map do | volume |
-                    Nocoah::Types::Compute::AttachedVolumeItem.new( volume )
+                    Types::Compute::AttachedVolumeItem.new( volume )
                 end
             end
 
-            # Gets attached volume item.
+            # Gets a attached volume item.
             #
             # @param [String]   server_id           Server ID
             # @param [String]   attachment_id       Attachment ID
@@ -917,10 +925,10 @@ module Nocoah
                 json_data = JSON.parse( res.body )
                 return nil unless json_data.key?( 'volumeAttachment' )
 
-                Nocoah::Types::Compute::AttachedVolumeItem.new( json_data['volumeAttachment'] )
+                Types::Compute::AttachedVolumeItem.new( json_data['volumeAttachment'] )
             end
 
-            # Attaches a volume to a virtual machine.
+            # Attaches a volume to the virtual machine.
             #
             # @param [String]   server_id       Server ID
             # @param [String]   volume_id       Volume ID
@@ -957,7 +965,7 @@ module Nocoah
                 Nocoah::Types::Compute::AttachedVolumeItem.new( json_data['volumeAttachment'] )
             end
 
-            # Detaches a volume from a virtual machine.
+            # Detaches the volume from the virtual machine.
             #
             # @param [String]   server_id           Server ID
             # @param [String]   attachment_id       Attachment ID
@@ -983,7 +991,7 @@ module Nocoah
                 server_id
             end
 
-            # Gets attached interface list.
+            # Gets a attached interface list.
             #
             # @param [String]   server_id       Server ID
             #
@@ -1007,11 +1015,11 @@ module Nocoah
                 return [] unless json_data.key?( 'interfaceAttachments' )
 
                 json_data['interfaceAttachments'].map do | interface |
-                    Nocoah::Types::Compute::AttachedInterfaceItem.new( interface )
+                    Types::Compute::AttachedInterfaceItem.new( interface )
                 end
             end
 
-            # Gets attached interface item.
+            # Gets a attached interface item.
             #
             # @param [String]   server_id       Server ID
             # @param [String]   port_id         Port ID
@@ -1035,10 +1043,10 @@ module Nocoah
                 json_data = JSON.parse( res.body )
                 return nil unless json_data.key?( 'interfaceAttachment' )
 
-                Nocoah::Types::Compute::AttachedInterfaceItem.new( json_data['interfaceAttachment'] )
+                Types::Compute::AttachedInterfaceItem.new( json_data['interfaceAttachment'] )
             end
 
-            # Attaches a interface to a virtual machine.
+            # Attaches a interface to the virtual machine.
             #
             # @param [String]   server_id       Server ID
             # @param [String]   port_id         Port ID
@@ -1075,10 +1083,10 @@ module Nocoah
                 json_data = JSON.parse( res.body )
                 return nil unless json_data.key?( 'interfaceAttachment' )
 
-                Nocoah::Types::Compute::AttachedInterfaceItem.new( json_data['interfaceAttachment'] )
+                Types::Compute::AttachedInterfaceItem.new( json_data['interfaceAttachment'] )
             end
 
-            # Detaches a interface from a virtual machine.
+            # Detaches the interface from the virtual machine.
             #
             # @param [String]   server_id       Server ID
             # @param [String]   port_id         Port ID
@@ -1104,12 +1112,12 @@ module Nocoah
                 server_id
             end
 
-            # Gets virtual machine metadata.
+            # Gets the virtual machine metadata.
             #
             # @param [String]   server_id       Server ID
             #
-            # @return [Nocoah::Types::Compute::ServerMetadata]          When succeeded, virtual machine metadata.
-            # @raise [Nocoah::APIError]                                 When failed.
+            # @return [Hash]                When succeeded, virtual machine metadata.
+            # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/compute-get_server_metadata.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=list-all-metadata-detail#list-all-metadata
@@ -1124,19 +1132,17 @@ module Nocoah
                 raise APIError, message: "Failed to get metadata (server_id: #{server_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
                 json_data = JSON.parse( res.body )
-                return nil unless json_data.key?( 'metadata' )
-
-                Nocoah::Types::Compute::ServerMetadata.new( json_data['metadata'] )
+                json_data['metadata']
             end
 
-            # Sets virtual machine metadata.
+            # Sets the virtual machine metadata.
             #
             # @param            [String]    server_id           Server ID
             # @param            [Hash]      metadata            Server metadata to set
             # @option metadata  [String]    instance_name_tag   Name tag
             #
-            # @return [Nocoah::Types::Compute::ServerMetadata]          When succeeded, virtual machine metadata.
-            # @raise [Nocoah::APIError]                                 When failed.
+            # @return [Hash]                When succeeded, virtual machine metadata.
+            # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/compute-update_metadata.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=replace-metadata-items-detail#replace-metadata-items
@@ -1154,12 +1160,10 @@ module Nocoah
                 raise APIError, message: "Failed to set metadata (server_id: #{server_id}, metadata: #{metadata}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
                 json_data = JSON.parse( res.body )
-                return nil unless json_data.key?( 'metadata' )
-
-                Nocoah::Types::Compute::ServerMetadata.new( json_data['metadata'] )
+                json_data['metadata']
             end
 
-            # Gets virtual machine addresses.
+            # Gets the virtual machine addresses.
             #
             # @param [String]   server_id       Server ID
             #
@@ -1187,7 +1191,7 @@ module Nocoah
                 end
             end
 
-            # Gets virtual machine addresses.
+            # Gets the virtual machine addresses.
             #
             # @param [String]   server_id           Server ID
             # @param [String]   network_label       Network label
@@ -1211,7 +1215,7 @@ module Nocoah
                 json_data = JSON.parse( res.body )
                 return nil unless json_data.key?( network_label )
                 
-                Nocoah::Types::Compute::ServerNetworkItem.new( network_label, json_data[network_label] )
+                Types::Compute::ServerNetworkItem.new( network_label, json_data[network_label] )
             end
 
             # Gets virtual machine cpu utilization rrd.
@@ -1234,7 +1238,7 @@ module Nocoah
                 get_server_rrd_core( server_id, url_query )
             end
 
-            # Gets virtual machine interface traffic rrd.
+            # Gets a virtual machine interface traffic rrd.
             #
             # @param            [String]    server_id           Server ID
             # @param            [String]    port_id             Port ID
@@ -1256,7 +1260,7 @@ module Nocoah
                 get_server_rrd_core( server_id, url_query )
             end
 
-            # Gets virtual machine disk utilization rrd.
+            # Gets a virtual machine disk utilization rrd.
             #
             # @param            [String]    server_id           Server ID
             # @param            [Hash]      url_query           Optional parameter
@@ -1277,7 +1281,7 @@ module Nocoah
                 get_server_rrd_core( server_id, url_query )
             end
 
-            # Gets backup list.
+            # Gets a backup list.
             #
             # @return [Array<Nocoah::Types::Compute::BackupItem>]       When succeeded, backup list.
             # @raise [Nocoah::APIError]                                 When failed.
@@ -1302,7 +1306,7 @@ module Nocoah
                 end
             end
 
-            # Gets backup item.
+            # Gets a backup item.
             #
             # @param [String]   backup_id       Backup ID
             #
@@ -1380,7 +1384,7 @@ module Nocoah
                 backup_id
             end
 
-            # Restores from backup.
+            # Restores from the backup.
             #
             # @param [String]   backup_id       Backup ID to use with restore
             # @param [String]   backuprun_id    Backup run ID to use with restore
@@ -1409,7 +1413,9 @@ module Nocoah
                 backup_id
             end
 
-            # Saves backup to image.
+            # Saves the backup to an image.
+            #
+            # @note Not available in current version.
             #
             # @param [String]   backup_id       Backup ID to save
             # @param [String]   backuprun_id    Backup run ID to save
@@ -1419,26 +1425,26 @@ module Nocoah
             # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/backup-backup_to_image_object.html
-            def save_server_backup_to_image( backup_id, backuprun_id:, image_name: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    createImage: {
-                        backuprun_id: backuprun_id,
-                        image_name: image_name
-                    }
-                }
+            # def save_server_backup_to_image( backup_id, backuprun_id:, image_name: )
+            #     headers = {
+            #         Accept: "application/json",
+            #         'X-Auth-Token': @identity.api_token
+            #     }
+            #     body = {
+            #         createImage: {
+            #             backuprun_id: backuprun_id,
+            #             image_name: image_name
+            #         }
+            #     }
 
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/backup/#{backup_id}/action", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to save backup (backup_id: #{backup_id}, backuprun_id: #{backuprun_id}, image_name: #{image_name}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
+            #     http_client = HTTPClient.new;
+            #     res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/backup/#{backup_id}/action", header: headers, body: body.to_json )
+            #     raise APIError, message: "Failed to save backup (backup_id: #{backup_id}, backuprun_id: #{backuprun_id}, image_name: #{image_name}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
-                backup_id
-            end
+            #     backup_id
+            # end
 
-            # Gets ISO image list.
+            # Gets a ISO image list.
             #
             # @return [Array<Nocoah::Types::Compute::ISOImageItem>]     When succeeded, ISO image list.
             # @raise [Nocoah::APIError]                                 When failed.
@@ -1460,7 +1466,7 @@ module Nocoah
 
             private
 
-            # Gets virtual machine template ( flavor ) list.
+            # Gets a virtual machine template ( flavor ) list.
             #
             # @param            [Boolean]   is_detail   When true, gets detail list
             # @param            [Hash]      url_query   Options
@@ -1486,7 +1492,7 @@ module Nocoah
                 json_data = JSON.parse( res.body )
             end
 
-            # Gets virtual machine list.
+            # Gets a virtual machine list.
             #
             # @param            [Boolean]   is_detail       When true, gets detail list
             # @param            [Hash]      url_query       Options
@@ -1526,7 +1532,7 @@ module Nocoah
                 json_data = JSON.parse( res.body )
             end
 
-            # Gets image list.
+            # Gets a image list.
             #
             # @param            [Boolean]   is_detail       When true, gets detail list
             # @param            [Hash]      url_query       Options
@@ -1565,7 +1571,7 @@ module Nocoah
                 json_data = JSON.parse( res.body )
             end
 
-            # Launches, restarts or stops virtual machine
+            # Launches, restarts or stops the virtual machine
             #
             # @param [String]   server_id       Server ID
             # @param [String]   action_name     Action name ( "launch" / "restart" / "stop" / "force-stop" )
@@ -1596,7 +1602,7 @@ module Nocoah
                 server_id
             end
 
-            # Gets console connection url.
+            # Gets a console connection url.
             #
             # @param [String]   server_id           Server ID
             # @param [Hash]     target_console      Target console
@@ -1619,7 +1625,7 @@ module Nocoah
                 json_data['console']['url']
             end
 
-            # Changes virtual machine hardware.
+            # Changes the virtual machine hardware.
             #
             # @param [String]   server_id       Server ID
             # @param [Hash]     target_hw       Target hardware
@@ -1640,7 +1646,7 @@ module Nocoah
                 server_id
             end
 
-            # Gets virtual machine rrd.
+            # Gets a virtual machine rrd.
             #
             # @param            [String]    server_id           Server ID
             # @param            [String]    target_rrd          Target RRD ( 'cpu', 'interface' or 'disk' )
@@ -1674,7 +1680,7 @@ module Nocoah
                 json_data = JSON.parse( res.body )
                 return nil unless json_data.key?( target_rrd )
                 
-                Nocoah::Types::Common::RRD.new( target_rrd, json_data[target_rrd] )
+                Types::Common::RRD.new( target_rrd, json_data[target_rrd] )
             end
 
         end
