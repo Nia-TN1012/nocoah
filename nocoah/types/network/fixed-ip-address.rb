@@ -6,8 +6,8 @@ module Nocoah
     # Types
     module Types
 
-        # Compute
-        module Compute
+        # Network
+        module Network
 
             # Fixed IP address
             class FixedIPAddress < Base

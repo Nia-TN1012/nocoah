@@ -1,5 +1,5 @@
 require_relative '../common'
-require_relative './fixed-ip-address'
+require_relative '../network/fixed-ip-address'
 
 # Nocoah
 module Nocoah
@@ -13,7 +13,7 @@ module Nocoah
             # Attached interface item
             class AttachedInterfaceItem < Base
 
-                # @return [Array<Nocoah::Types::Compute::FixedIPAddress>] Fixed IP addresses with subnet IDs
+                # @return [Array<Nocoah::Types::Network::FixedIPAddress>] Fixed IP addresses with subnet IDs
                 attr_reader :fixed_ips
                 # @return [String] MAC address
                 attr_reader :mac_addr
@@ -28,7 +28,7 @@ module Nocoah
                 #
                 # @param [Hash] data    Hash data
                 def initialize( data )
-                    @fixed_ips = data['fixed_ips'].map { | ip | FixedIPAddress.new( ip ) } rescue []
+                    @fixed_ips = data['fixed_ips'].map { | ip | Network::FixedIPAddress.new( ip ) } rescue []
                     @mac_addr = data['mac_addr']
                     @net_id = data['net_id']
                     @port_id = data['port_id']

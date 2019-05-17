@@ -7,14 +7,14 @@ module Nocoah
         # Base
         class Base
 
-            # Converts the instance variables to a hash
+            # Converts the instance variables to a string.
             #
             # @return [String]
             def to_s
                 self.to_hash.to_s
             end
 
-            # Converts the instance variables to a hash
+            # Converts the instance variables to a hash.
             #
             # @return [Hash]
             def to_hash

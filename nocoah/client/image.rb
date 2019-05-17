@@ -199,6 +199,7 @@ module Nocoah
             # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/image-set_quota.html
+            # @see https://www.conoha.jp/vps/pricing/
             def set_image_quota( image_quota )
                 headers = {
                     Accept: "application/json",

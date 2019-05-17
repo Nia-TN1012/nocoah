@@ -149,6 +149,7 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/cinder-create_volume.html
             # @see https://www.conoha.jp/docs/cinder-create_volume_specified.html
+            # @see https://www.conoha.jp/vps/pricing/
             # @see https://developer.openstack.org/api-ref/block-storage/v2/?expanded=create-volume-detail#show-volume-details
             def create_volume( volume_id: nil, name: nil, size:, **options )
                 raise ArgumentError, "You must specify a valid value for volume_id or name." if volume_id.nil? && name.nil?

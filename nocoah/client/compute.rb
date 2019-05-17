@@ -284,6 +284,7 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/compute-create_vm.html
             # @see https://support.conoha.jp/v/startupscript/
+            # @see https://www.conoha.jp/vps/pricing/
             # @see https://developer.openstack.org/api-ref/compute/?expanded=create-server-detail#create-server
             def create_server( image_id:, flavor_id:, **options )
                 server_options = {
@@ -457,8 +458,9 @@ module Nocoah
             # @see confirm_resize_server
             # @see revert_resize_server
             # @see https://www.conoha.jp/docs/compute-vm_resize.html
+            # @see https://www.conoha.jp/vps/pricing/
             # @see https://developer.openstack.org/api-ref/compute/?expanded=resize-server-resize-action-detail#resize-server-resize-action
-            def resize_server( server_id, flavor_id, **options )
+            def resize_server( server_id, flavor_id: )
                 headers = {
                     Accept: "application/json",
                     'X-Auth-Token': @identity.api_token
@@ -585,7 +587,7 @@ module Nocoah
                 get_console_url_core( server_id, target_console: { :'os-getSerialConsole' => { :type => "serial" } } )
             end
 
-            # Creates a server image.
+            # Creates a new server image.
             #
             # @param [String]   server_id       Server ID
             # @param [String]   image_name      Image name  
@@ -1342,6 +1344,7 @@ module Nocoah
             #
             # @see end_server_backup
             # @see https://www.conoha.jp/docs/backup-start_backup.html
+            # @see https://www.conoha.jp/vps/pricing/
             def start_server_backup( server_id )
                 headers = {
                     Accept: "application/json",
