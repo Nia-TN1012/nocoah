@@ -1,3 +1,4 @@
+require_relative '../base'
 require_relative '../common'
 
 # Nocoah
@@ -10,7 +11,7 @@ module Nocoah
         module Compute
 
             # Virtual machine item
-            class ServerItem
+            class ServerItem < Base
 
                 # @return [String] Server ID
                 attr_reader :server_id
@@ -19,18 +20,13 @@ module Nocoah
                 # @return [Array<Nocoah::Types::Common::Link>] Links
                 attr_reader :links
 
+                # Creates a new {ServerItem} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     @server_id = data['id']
                     @name = data['name']
                     @links = data['links'].map { | link | Common::Link.new( link['href'], link['rel'] ) } rescue []
-                end
-
-                def to_s
-                    {
-                        'Server ID' => @server_id,
-                        'Server name' => @name,
-                        'Links' => @links.map { | link | link.to_s }
-                    }.to_s
                 end
                 
             end

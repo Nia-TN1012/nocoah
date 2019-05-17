@@ -1,3 +1,5 @@
+require_relative '../base'
+
 # Nocoah
 module Nocoah
 
@@ -8,7 +10,7 @@ module Nocoah
         module Compute
 
             # Server address item
-            class ServerAddressItem
+            class ServerAddressItem < Base
 
                 # @return [String] Mac address
                 attr_reader :mac_address
@@ -19,20 +21,14 @@ module Nocoah
                 # @return [Integer] Version
                 attr_reader :version
 
+                # Creates a new {ServerAddressItem} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     @mac_address = data['OS-EXT-IPS-MAC:mac_addr']
                     @type = data['OS-EXT-IPS:type']
                     @ip_address = data['addr']
                     @version = data['version']
-                end
-
-                def to_s
-                    {
-                        'Mac address' => @mac_address,
-                        'Type' => @type,
-                        'IP address' => @ip_address,
-                        'Version' => @version
-                    }.to_s
                 end
 
             end

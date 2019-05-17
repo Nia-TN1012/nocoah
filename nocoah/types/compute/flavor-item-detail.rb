@@ -1,3 +1,4 @@
+require_relative '../../utility'
 require_relative './flavor-item'
 
 # Nocoah
@@ -27,6 +28,9 @@ module Nocoah
                 # @return [Boolean] Whether the flavor is public
                 attr_reader :is_public
 
+                # Creates a new {FlavorItemDetail} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     super( data )
 
@@ -35,23 +39,8 @@ module Nocoah
                     @swap = data['swap']
                     @rxtx_factor = data['rxtx_factor']
                     @disk = data['disk']
-                    @is_public = Common.to_b( data['os-flavor-access:is_public'] )
+                    @is_public = Utility.to_b( data['os-flavor-access:is_public'] )
                     @ephemeral = data['OS-FLV-EXT-DATA:ephemeral']
-                end
-
-                def to_s
-                    {
-                        'Flavor ID' => @flavor_id,
-                        'Flavor name' => @name,
-                        'Links' => @links,
-                        'vCPU' => @vcpus,
-                        'RAM' => "#{@ram} MiB",
-                        'Swap' => "#{@swap} MiB",
-                        'Disk' => "#{@disk} GiB",
-                        'Disk (ephemeral)' => "#{@ephemeral} GiB",
-                        'RXTX Factor' => @rxtx_factor,
-                        'Is public' => @is_public
-                    }.to_s
                 end
 
             end

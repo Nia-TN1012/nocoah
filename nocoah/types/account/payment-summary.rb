@@ -1,4 +1,5 @@
 require 'date'
+require_relative '../base'
 
 # Nocoah
 module Nocoah
@@ -10,19 +11,16 @@ module Nocoah
         module Account
 
             # Payment summary
-            class PaymentSummary
+            class PaymentSummary < Base
 
                 # @return [Integer] Total deposit amount
                 attr_reader :total_deposit_amount
 
+                # Creates a new {PaymentSummary} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     @total_deposit_amount = data['total_deposit_amount']
-                end
-
-                def to_s
-                    {
-                        'Total deposit amount' => @total_deposit_amount
-                    }.to_s
                 end
 
             end

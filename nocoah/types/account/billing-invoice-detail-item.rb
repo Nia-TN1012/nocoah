@@ -1,4 +1,5 @@
 require 'date'
+require_relative '../base'
 
 # Nocoah
 module Nocoah
@@ -10,7 +11,7 @@ module Nocoah
         module Account
 
             # Billing invoice detail
-            class BillingInvoiceDetailItem
+            class BillingInvoiceDetailItem <Base
 
                 # @return [Integer] Invoice detail ID
                 attr_reader :invoice_detail_id
@@ -25,6 +26,9 @@ module Nocoah
                 # @return [DateTime] End date
                 attr_reader :end_date
 
+                # Creates a new {BillingInvoiceDetailItem} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     @invoice_detail_id = data['invoice_detail_id']
                     @product_name = data['product_name']
@@ -32,17 +36,6 @@ module Nocoah
                     @quantity = data['quantity']
                     @start_date = DateTime.parse( data['start_date'] ) rescue nil
                     @end_date = DateTime.parse( data['end_date'] ) rescue nil
-                end
-
-                def to_s
-                    {
-                        'Invoice detail ID' => @invoice_detail_id,
-                        'Product name' => @product_name,
-                        'Unit price' => @unit_price,
-                        'Quantitiy' => @quantity,
-                        'Start date' => @start_date,
-                        'End date' => @end_date
-                    }.to_s
                 end
 
             end

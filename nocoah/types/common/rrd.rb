@@ -1,3 +1,5 @@
+require_relative '../base'
+
 # Nocoah
 module Nocoah
 
@@ -8,7 +10,7 @@ module Nocoah
         module Common
 
             # Round robin database
-            class RRD
+            class RRD < Base
 
                 # @return [String] Name
                 attr_reader :name
@@ -17,18 +19,14 @@ module Nocoah
                 # @return [Array<Array<Integer>>] Data
                 attr_reader :data
 
+                # Creates a new {RRD} class instance.
+                #
+                # @param [String]   name        RRD name
+                # @param [Hash]     data        Hash data
                 def initialize( name, data )
                     @name = name
                     @schema = data['schema']
                     @data = data['data']
-                end
-
-                def to_s
-                    {
-                        'Name' => @name,
-                        'Schema' => @schema,
-                        'Data' => @data
-                    }.to_s
                 end
                 
             end

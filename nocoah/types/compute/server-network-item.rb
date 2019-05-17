@@ -26,13 +26,6 @@ module Nocoah
                     @addresses = addresses.map { | address | ServerAddressItem.new( address ) } rescue []
                 end
 
-                def to_s
-                    {
-                        'Network label' => @network_label,
-                        'Addresses' => @addresses.map { | address | address.to_s },
-                    }.to_s
-                end
-
             end
 
         end

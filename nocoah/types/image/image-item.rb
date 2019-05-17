@@ -1,3 +1,7 @@
+require 'date'
+require_relative '../base'
+require_relative '../../utility'
+
 # Nocoah
 module Nocoah
 
@@ -8,7 +12,7 @@ module Nocoah
         module Image
 
             # Image item
-            class ImageItem
+            class ImageItem < Base
 
                 # @return [String] Image ID
                 attr_reader :image_id
@@ -48,6 +52,31 @@ module Nocoah
                 attr_reader :hw_qemu_guest_agent
                 # @return [String] Image schema url
                 attr_reader :schema
+
+                # Creates a new {ImageItem} class instance.
+                #
+                # @param [Hash] data    Data
+                def initialize( data )
+                    @image_id = data['id']
+                    @name = data['name']
+                    @status = data['status']
+                    @tags = data['tags']
+                    @container_format = data['container_format']
+                    @created_at = DateTime.parse( data['created_at'] )
+                    @size = data['size']
+                    @disk_format = data['disk_format']
+                    @visibility = data['visibility']
+                    @protected = Utility.to_b( data['protected'] )
+                    @min_ram = data['min_ram']
+                    @min_disk = data['min_disk']
+                    @self = data['self']
+                    @file = data['file']
+                    @direct_url = data['direct_url']
+                    @checksum = data['checksum']
+                    @owner = data['owner']
+                    @hw_qemu_guest_agent = data['hw_qemu_guest_agent']
+                    @schema = data['schema']
+                end
 
             end
 

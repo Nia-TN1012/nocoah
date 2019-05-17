@@ -1,3 +1,5 @@
+require_relative '../base'
+
 # Nocoah
 module Nocoah
 
@@ -8,7 +10,7 @@ module Nocoah
         module Compute
 
             # Key-pair item
-            class KeyPairItem
+            class KeyPairItem < Base
 
                 # @return [String] Key name
                 attr_reader :name
@@ -17,18 +19,13 @@ module Nocoah
                 # @return [String] Fingerprint
                 attr_reader :fingerprint
 
+                # Creates a new {KeyPairItem} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     @key_name = data['name']
                     @public_key = data['public_key']
                     @fingerprint = data['fingerprint']
-                end
-
-                def to_s
-                    {
-                        'Key name' => @key_name,
-                        'Public key' => @public_key,
-                        'Fingerprint' => @fingerprint,
-                    }.to_s
                 end
 
             end

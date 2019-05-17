@@ -22,14 +22,17 @@ module Nocoah
                 # @return [Integer] Image size (byte)
                 attr_reader :image_size
                 # @return [Integer] The minimum amount of RAM an image requires to boot (MiB)
-                attr_reader :minRam
+                attr_reader :min_ram
                 # @return [Integer] The minimum amount of disk space an image requires to boot (GiB)
-                attr_reader :minDisk
+                attr_reader :min_disk
                 # @return [Integer] A percentage value of the image save progress
                 attr_reader :progress
                 # @return [Hash] Image metadata
                 attr_reader :metadata
                 
+                # Creates a new {ImageItemDetail} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     super( data )
 
@@ -37,26 +40,10 @@ module Nocoah
                     @created = DateTime.parse( data['created'] ) rescue nil
                     @updated = DateTime.parse( data['updated'] ) rescue nil
                     @image_size = data['OS-EXT-IMG-SIZE:size']
-                    @minRam = data['minRam']
-                    @minDisk = data['minDisk']
+                    @min_ram = data['minRam']
+                    @min_disk = data['minDisk']
                     @progress = data['progress']
                     @metadata = data['metadata']
-                end
-
-                def to_s
-                    {
-                        'Image ID' => @image_id,
-                        'Image name' => @name,
-                        'Links' => @links.map { | link | link.to_s },
-                        'Status' => @status,
-                        'Created' => @created,
-                        'Updated' => @updated,
-                        'Image size' => @image_size,
-                        'Min RAM' => "#{@minRam} MiB",
-                        'Min disk space' => "#{minDisk} GiB",
-                        'Save progress' => @progress,
-                        'Metadata' => @metadata,
-                    }.to_s
                 end
 
             end

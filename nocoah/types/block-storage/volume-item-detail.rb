@@ -1,4 +1,5 @@
 require 'date'
+require_relative '../../utility'
 require_relative './volume-item'
 require_relative '../compute/attached-volume-item'
 
@@ -51,13 +52,16 @@ module Nocoah
                 # @return [Hash] Volume metadata
                 attr_reader :metadata
 
+                # Creates a new {VolumeItemDetail} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     super( data )
 
                     @status = data['status']
                     @availability_zone = data['availability_zone']
-                    @bootable = Common.to_b( data['bootable'] )
-                    @encrypted = Common.to_b( data['encrypted'] )
+                    @bootable = Utility.to_b( data['bootable'] )
+                    @encrypted = Utility.to_b( data['encrypted'] )
                     @volume_type = data['volume_type']
                     @description = data['description']
                     @size = data['size']
@@ -72,32 +76,6 @@ module Nocoah
                     @replication_extended_status = data['os-volume-replication:extended_status']
                     @replication_driver_data = data['os-volume-replication:driver_data']
                     @metadata = data['metadata']
-                end
-
-                def to_s
-                    {
-                        'Volume ID' => @volume_id,
-                        'Volume name' => @name,
-                        'Links' => @links.map { | link | link.to_s },
-                        'Status' => @status,
-                        'Availability zone' => @availability_zone,
-                        'Bootable' => @bootable,
-                        'Encrypted' => @encrypted,
-                        'Volume type' => @volume_type,
-                        'Description' => @description,
-                        'Volume size' => "#{@size} GiB",
-                        'User ID' => @user_id,
-                        'Create time' => @created_at,
-                        'Tenant ID' => @tenant_id,
-                        'Consistency group ID' => @consistencygroup_id,
-                        'Source volume ID' => @source_volid,
-                        'Snapshot ID' => @snapshot_id,
-                        'Attachments' => @attachments.map { | attachment | attachment.to_s },
-                        'Replication status' => @replication_status,
-                        'Replication status (extended)' => @replication_extended_status,
-                        'Replication driver data' => @replication_driver_data,
-                        'Volume metadata' => @metadata,
-                    }.to_s
                 end
 
             end

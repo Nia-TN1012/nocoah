@@ -19,23 +19,15 @@ module Nocoah
                 # @return [String] Root password
                 attr_reader :admin_password
 
+                # Creates a new {CreateServerResult} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     super( data )
 
                     @disk_config = data['OS-DCF:diskConfig']
                     @security_groups = data['security_groups'].map { | sg | sg['name'] } rescue []
                     @admin_password = data['adminPass']
-                end
-
-                def to_s
-                    {
-                        'Server ID' => @server_id,
-                        'Server name' => @name,
-                        'Links' => @links.map { | link | link.to_s },
-                        'Disk config' => @disk_config,
-                        'Security goups' => @security_groups.map { | sg | sg.to_s },
-                        'Root password' => @admin_password,
-                    }.to_s
                 end
 
             end

@@ -1,4 +1,5 @@
 require 'date'
+require_relative '../base'
 
 # Nocoah
 module Nocoah
@@ -10,7 +11,7 @@ module Nocoah
         module Account
 
             # Order item
-            class OrderItem
+            class OrderItem < Base
 
                 # @return [String] Order item unique ID
                 attr_reader :uu_id
@@ -21,22 +22,14 @@ module Nocoah
                 # @return [String] Item status
                 attr_reader :item_status
 
-                
+                # Creates a new {OrderItem} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     @uu_id = data['uu_id'] rescue nil
                     @service_name = data['service_name'] rescue nil
                     @service_start_date = DateTime.parse( data['service_start_date'] ) rescue nil
                     @item_status = data['item_status'] rescue nil
-                end
-
-                
-                def to_s
-                    {
-                        'UUID' => @uu_id,
-                        'Service name' => @service_name,
-                        'Service start date' => @service_start_date,
-                        'Item status' => @item_status
-                    }.to_s
                 end
 
             end

@@ -1,3 +1,4 @@
+require_relative '../base'
 require_relative '../common'
 
 # Nocoah
@@ -10,7 +11,7 @@ module Nocoah
         module Compute
 
             # Attached volume item
-            class AttachedVolumeItem
+            class AttachedVolumeItem < Base
 
                 # @return [String] Attachment ID
                 attr_reader :attachment_id
@@ -23,22 +24,15 @@ module Nocoah
                 # @return [String] Attached volume ID
                 attr_reader :volume_id
 
+                # Creates a new {AttachedVolumeItem} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     @attachment_id = data['id']
                     @host_name = data['host_name']
                     @device = data['device']
                     @server_id = data['serverId']
                     @volume_id = data['volumeId']
-                end
-
-                def to_s
-                    {
-                        'Attachment ID' => @attachment_id,
-                        'Host name' => @host_name,
-                        'Device' => @device,
-                        'Attached server ID' => @server_id,
-                        'Attached volume ID' => @volume_id,
-                    }.to_s
                 end
 
             end

@@ -1,4 +1,5 @@
 require 'date'
+require_relative '../base'
 
 # Nocoah
 module Nocoah
@@ -10,7 +11,7 @@ module Nocoah
         module Account
 
             # Notification item
-            class NotificationItem
+            class NotificationItem < Base
 
                 # @return [Integer] Notification code
                 attr_reader :notification_code
@@ -25,6 +26,9 @@ module Nocoah
                 # @return [DateTime] Publishd date
                 attr_reader :start_date
 
+                # Creates a new {BillingInvoiceItem} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     @notification_code = data['notification_code']
                     @title = data['title']
@@ -32,17 +36,6 @@ module Nocoah
                     @contents = data['contents']
                     @read_status = data['read_status']
                     @start_date = DateTime.parse( data['start_date'] ) rescue nil
-                end
-
-                def to_s
-                    {
-                        'Notification code' => @notification_code,
-                        'Title' => @title,
-                        'Notification type' => @type,
-                        'Contents' => @contents,
-                        'Read status' => @read_status,
-                        'Publishd date' => @start_date
-                    }.to_s
                 end
 
             end

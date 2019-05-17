@@ -1,4 +1,5 @@
 require 'date'
+require_relative '../../utility'
 require_relative './server-item'
 require_relative './flavor-item'
 require_relative './image-item'
@@ -74,6 +75,9 @@ module Nocoah
                 # @return [Hash] Server metadata
                 attr_reader :metadata
 
+                # Creates a new {ServerItem} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     super( data )
 
@@ -102,41 +106,8 @@ module Nocoah
                     @access_IPv6 = data['accessIPv6']
                     @progress = data['progress']
                     @power_state = data['OS-EXT-STS:power_state']
-                    @config_drive = Common.to_b( data['config_drive'] )
+                    @config_drive = Utility.to_b( data['config_drive'] )
                     @metadata = data['metadata']
-                end
-
-                def to_s
-                    {
-                        'Server ID' => @server_id,
-                        'Server name' => @name,
-                        'Links' => @links.map { | link | link.to_s },
-                        'Status' => @status,
-                        'Created' => @created,
-                        'Updated' => @updated,
-                        'User ID' => @user_id,
-                        'Tenant ID' => @tenant_id,
-                        'Flavor' => @flavor.to_s,
-                        'Image' => @image.to_s,
-                        'Key name' => @key_name,
-                        'Host ID' => @hostId,
-                        'Addresses' => @addresses.map { | address | address.to_s },
-                        'Security goups' => @security_groups.map { | sg | sg.to_s },
-                        'Availability zone' => @availability_zone,
-                        'Host' => @host,
-                        'Hypervisor hostname' => @hypervisor_hostname,
-                        'Instance name' => @instance_name,
-                        'Launched' => @launched_at,
-                        'Terminated' => @terminated_at,
-                        'Task state' => @task_state,
-                        'VM state' => @vm_state,
-                        'Power state' => @power_state,
-                        'Disk config' => @disk_config,
-                        'Attached volumes' => @attached_volumes.to_s,
-                        'Access IPv4' => @access_IPv4,
-                        'Access IPv6' => @access_IPv6,
-                        'Metadata' => @metadata,
-                    }.to_s
                 end
 
             end

@@ -24,6 +24,9 @@ module Nocoah
                 # @return [Boolean] Whether it has been deleted
                 attr_reader :deleted
 
+                # Creates a new {KeyPairItemDetail} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     super( data )
 
@@ -32,19 +35,6 @@ module Nocoah
                     @created_at = DateTime.parse( data['created_at'] ) rescue nil
                     @updated_at = DateTime.parse( data['updated_at'] ) rescue nil
                     @deleted = data['deleted']
-                end
-
-                def to_s
-                    {
-                        'Key name' => @key_name,
-                        'Public key' => @public_key,
-                        'Fingerprint' => @fingerprint,
-                        'Key-pair ID' => @keypair_id,
-                        'User ID' => @user_id,
-                        'Created time' => @created_at,
-                        'Updated time' => @updated_at,
-                        'Is deleted' => @deleted,
-                    }.to_s
                 end
 
             end

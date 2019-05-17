@@ -1,3 +1,5 @@
+require_relative '../base'
+
 # Nocoah
 module Nocoah
 
@@ -8,7 +10,7 @@ module Nocoah
         module BlockStorage
 
             # Volume type item
-            class VolumeTypeItem
+            class VolumeTypeItem < Base
 
                 # @return [String] Volume type ID
                 attr_reader :volume_type_id
@@ -17,18 +19,13 @@ module Nocoah
                 # @return [String] Volume backend name
                 attr_reader :volume_backend_name
 
+                # Creates a new {VolumeTypeItem} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     @volume_type_id = data['id']
                     @name = data['name']
                     @volume_backend_name = data['extra_specs']['volume_backend_name'] rescue nil
-                end
-
-                def to_s
-                    {
-                        'Volume type ID' => @volume_type_id,
-                        'Volume type name' => @name,
-                        'Volume backend name' => @volume_backend_name,
-                    }.to_s
                 end
 
             end

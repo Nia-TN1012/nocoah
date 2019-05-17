@@ -10,7 +10,7 @@ module Nocoah
         module Compute
 
             # Backup item
-            class BackupItem
+            class BackupItem < Base
 
                 # @return [String] Backup ID
                 attr_reader :backup_id
@@ -19,18 +19,13 @@ module Nocoah
                 # @return [Array<Nocoah::Types::Compute::BackupRunItem>] Backup runs
                 attr_reader :backupruns
 
+                # Creates a new {BackupItem} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     @backup_id = data['id']
                     @instance_id = data['instance_id']
                     @backupruns = data['backupruns'].map { | backuprun | BackupRunItem.new( backuprun ) } rescue []
-                end
-
-                def to_s
-                    {
-                        'Backup ID' => @backup_id,
-                        'Instance ID' => @instance_id,
-                        'Backup runs' => @backupruns.map { | backuprun | backuprun.to_s },
-                    }.to_s
                 end
 
             end

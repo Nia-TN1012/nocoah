@@ -1,4 +1,5 @@
 require 'date'
+require_relative '../../utility'
 require_relative './server-item'
 require_relative './flavor-item'
 require_relative './image-item'
@@ -20,7 +21,7 @@ module Nocoah
                 # @return [DateTime] Server updated
                 attr_reader :updated
                 # @return [String] Host ID
-                attr_reader :hostId
+                attr_reader :host_id
                 # @return [Array<Nocoah::Types::Compute::ServerNetworkItem>] Addresses
                 attr_reader :addresses
                 # @return [Nocoah::Types::Compute::ImageItem] Used image
@@ -38,9 +39,9 @@ module Nocoah
                 # @return [String] Disk configuration
                 attr_reader :disk_config
                 # @return [String] IPv4 address that should be used to access this server
-                attr_reader :access_IPv4
+                attr_reader :access_ipv4
                 # @return [String] IPv6 address that should be used to access this server
-                attr_reader :access_IPv6
+                attr_reader :access_ipv6
                 # @return [Integer] A percentage value of the operation progress
                 attr_reader :progress
                 # @return [Hash] Server metadata
@@ -48,12 +49,15 @@ module Nocoah
                 # @return [String] Root password
                 attr_reader :admin_password
 
+                # Creates a new {RebuildServerResult} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     super( data )
 
                     @status = data['status']
                     @updated = DateTime.parse( data['updated'] ) rescue nil
-                    @hostId = data['hostId']
+                    @host_id = data['hostId']
                     @addresses = data['addresses'].map { | label, ips | ServerNetworkItem.new( label, ips ) } rescue []
                     @image = ImageItem.new( data['image'] ) rescue nil
                     @flavor = FlavorItem.new( data['flavor'] ) rescue nil
@@ -61,33 +65,11 @@ module Nocoah
                     @created = DateTime.parse( data['created'] ) rescue nil
                     @tenant_id = data['tenant_id']
                     @disk_config = data['OS-DCF:diskConfig']
-                    @access_IPv4 = data['accessIPv4']
-                    @access_IPv6 = data['accessIPv6']
+                    @access_ipv4 = data['accessIPv4']
+                    @access_ipv6 = data['accessIPv6']
                     @progress = data['progress']
-                    @config_drive = Common.to_b( data['config_drive'] )
+                    @config_drive = Utility.to_b( data['config_drive'] )
                     @admin_password = data['adminPass']
-                end
-
-                def to_s
-                    {
-                        'Server ID' => @server_id,
-                        'Server name' => @name,
-                        'Links' => @links.map { | link | link.to_s },
-                        'Status' => @status,
-                        'Created' => @created,
-                        'Updated' => @updated,
-                        'User ID' => @user_id,
-                        'Tenant ID' => @tenant_id,
-                        'Flavor' => @flavor.to_s,
-                        'Image' => @image.to_s,
-                        'Host ID' => @hostId,
-                        'Addresses' => @addresses.map { | address | address.to_s },
-                        'Disk config' => @disk_config,
-                        'Access IPv4' => @access_IPv4,
-                        'Access IPv6' => @access_IPv6,
-                        'Metadata' => @metadata,
-                        'Root password' => @admin_password,
-                    }.to_s
                 end
 
             end

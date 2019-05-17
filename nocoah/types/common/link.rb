@@ -1,3 +1,5 @@
+require_relative '../base'
+
 # Nocoah
 module Nocoah
 
@@ -8,20 +10,21 @@ module Nocoah
         module Common
 
             # Link
-            class Link
+            class Link < Base
 
                 # @return [String] URL
                 attr_reader :href
                 # @return [String] Relation type
                 attr_reader :rel
                 
+                # Creates a new {Link} class instance.
+                #
+                # @param [String] href      URL
+                # @param [String] rel       Relation type
+                #
                 def initialize( href, rel )
                     @href = href
                     @rel = rel
-                end
-
-                def to_s
-                    "#{href} (rel: #{rel})"
                 end
 
             end

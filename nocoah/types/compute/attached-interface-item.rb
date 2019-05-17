@@ -11,7 +11,7 @@ module Nocoah
         module Compute
 
             # Attached interface item
-            class AttachedInterfaceItem
+            class AttachedInterfaceItem < Base
 
                 # @return [Array<Nocoah::Types::Compute::FixedIPAddress>] Fixed IP addresses with subnet IDs
                 attr_reader :fixed_ips
@@ -24,22 +24,15 @@ module Nocoah
                 # @return [String] Port status
                 attr_reader :port_state
 
+                # Creates a new {AttachedInterfaceItem} class instance.
+                #
+                # @param [Hash] data    Hash data
                 def initialize( data )
                     @fixed_ips = data['fixed_ips'].map { | ip | FixedIPAddress.new( ip ) } rescue []
                     @mac_addr = data['mac_addr']
                     @net_id = data['net_id']
                     @port_id = data['port_id']
                     @port_state = data['port_state']
-                end
-
-                def to_s
-                    {
-                        'Fixed IP addresses with subnet IDs' => @fixed_ips.map { | ip | ip.to_s },
-                        'MAC address' => @mac_addr,
-                        'Network ID' => @net_id,
-                        'Port ID' => @port_id,
-                        'Port status' => @port_state,
-                    }.to_s
                 end
 
             end
