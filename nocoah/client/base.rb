@@ -14,6 +14,9 @@ module Nocoah
             # API Endpoint ( '%s' contains a string representing the region. (e.q. 'tyo1', 'sin1' or 'sjc1') )
             ENDPOINT_BASE = "https://identity.%s.conoha.io/v2.0"
 
+            ## HTTP Client
+            @@http_client = HTTPClient.new;
+
             # Initializes a new Base instance.
             #
             # @param          [Hash]                options             Options
@@ -49,15 +52,119 @@ module Nocoah
             # @return [Hash]                When succeeded, API version info.
             # @raise [Nocoah::APIError]     When failed.
             def version
+                api_get( "", error_message: "Failed to get version info." )
+            end
+
+            private
+
+            # Calls API with GET method
+            #
+            # @param [String]   api_path            API url path ( from endpoint )
+            # @param [Hash]     opt_header          Optional request header
+            # @param [String]   error_message       Error message when api failed
+            # @param [Boolean]  raise_api_failed    If true, raises {Nocoah::APIError} when api failed
+            # @param [Proc]     api_res_callback    Callback ( HTTP::Message ) => Object
+            #
+            # @return [Hash]                When not specified api_res_callback, returns hash obuject from response body.
+            # @return [Object]              When specified api_res_callback, returns the callback's return value.
+            # @raise [Nocoah::APIError]     When api failed.
+            def api_get( api_path, opt_header: {}, error_message: nil, raise_api_failed: true, &api_res_callback )
                 headers = {
                     Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token,
-                }
-                http_client = HTTPClient.new;
-                res = http_client.get( @endpoint, header: headers )
-                raise APIError, message: "Failed to get version info.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                    'X-Auth-Token': @identity.api_token
+                }.merge!( opt_header )
+                error_message ||= "API GET Failed."
+
+                res = @@http_client.get( "#{@endpoint}#{api_path}", header: headers )
+                raise APIError, message: error_message, http_code: res.status if raise_api_failed && res.status >= HTTP::Status::BAD_REQUEST
+                if block_given?
+                    return api_res_callback.call( res )
+                else
+                    return JSON.parse( res.body )
+                end
+            end
+
+            # Calls API with POST method
+            #
+            # @param [String]   api_path            API url path ( from endpoint )
+            # @param [Hash]     opt_header          Optional request header
+            # @param [Hash]     body                Request body
+            # @param [String]   error_message       Error message when api failed
+            # @param [Boolean]  raise_api_failed    If true, raises {Nocoah::APIError} when api failed
+            # @param [Proc]     api_res_callback    Callback ( HTTP::Message ) => Object
+            #
+            # @return [Hash]                When not specified api_res_callback, returns hash obuject from response body.
+            # @return [Object]              When specified api_res_callback, returns the callback's return value.
+            # @raise [Nocoah::APIError]     When api failed.
+            def api_post( api_path, opt_header: {}, body: {}, error_message: nil, raise_api_failed: true, &api_res_callback )
+                headers = {
+                    Accept: "application/json",
+                    'X-Auth-Token': @identity.api_token
+                }.merge!( opt_header )
+                error_message ||= "API POST Failed."
+
+                res = @@http_client.post( "#{@endpoint}#{api_path}", header: headers, body: body.to_json )
+                raise APIError, message: error_message, http_code: res.status if raise_api_failed && res.status >= HTTP::Status::BAD_REQUEST
+                if block_given?
+                    return api_res_callback.call( res )
+                else
+                    return JSON.parse( res.body )
+                end
+            end
+
+            # Calls API with PUT method
+            #
+            # @param [String]   api_path            API url path ( from endpoint )
+            # @param [Hash]     opt_header          Optional request header
+            # @param [Hash]     body                Request body
+            # @param [String]   error_message       Error message when api failed
+            # @param [Boolean]  raise_api_failed    If true, raises {Nocoah::APIError} when api failed
+            # @param [Proc]     api_res_callback    Callback ( HTTP::Message ) => Object
+            #
+            # @return [Hash]                When not specified api_res_callback, returns hash obuject from response body.
+            # @return [Object]              When specified api_res_callback, returns the callback's return value.
+            # @raise [Nocoah::APIError]     When api failed.
+            def api_put( api_path, opt_header: {}, body: {}, error_message: nil, raise_api_failed: true, &api_res_callback )
+                headers = {
+                    Accept: "application/json",
+                    'X-Auth-Token': @identity.api_token
+                }.merge!( opt_header )
+                error_message ||= "API PUT Failed."
+
+                res = @@http_client.put( "#{@endpoint}#{api_path}", header: headers, body: body.to_json )
+                raise APIError, message: error_message, http_code: res.status if raise_api_failed && res.status >= HTTP::Status::BAD_REQUEST
+                if block_given?
+                    return api_res_callback.call( res )
+                else
+                    return JSON.parse( res.body )
+                end
+            end
+
+            # Calls API with DELETE method
+            #
+            # @param [String]   api_path            API url path ( from endpoint )
+            # @param [Hash]     opt_header          Optional request header
+            # @param [String]   error_message       Error message when api failed
+            # @param [Boolean]  raise_api_failed    If true, raises {Nocoah::APIError} when api failed
+            # @param [Proc]     api_res_callback    Callback ( HTTP::Message ) => Object
+            #
+            # @return [Hash]                When not specified api_res_callback, returns hash obuject from response body.
+            # @return [Object]              When specified api_res_callback, returns the callback's return value.
+            # @raise [Nocoah::APIError]     When api failed.
+            def api_delete( api_path, opt_header: {}, error_message: nil, raise_api_failed: true, &api_res_callback )
+                headers = {
+                    Accept: "application/json",
+                    'X-Auth-Token': @identity.api_token
+                }.merge!( opt_header )
+                error_message ||= "API DELETE Failed."
+
+                res = @@http_client.delete( "#{@endpoint}#{api_path}", header: headers )
+                raise APIError, message: error_message, http_code: res.status if raise_api_failed && res.status >= HTTP::Status::BAD_REQUEST
+                if block_given?
+                    return api_res_callback.call( res )
+                else
+                    return JSON.parse( res.body )
+                end
             end
 
         end

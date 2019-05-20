@@ -76,16 +76,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_flavors_detail_specified.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-flavor-details-detail#show-flavor-details
             def get_flavor_detail( flavor_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/flavors/#{flavor_id}", header: headers )
-                raise APIError, message: "Failed to get flavor (flavor_id: #{flavor_id}) detail item.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/flavors/#{flavor_id}",
+                    error_message: "Failed to get flavor item detail (flavor_id: #{flavor_id})."
+                )
                 return nil unless json_data.key?( 'flavor' )
 
                 Types::Compute::FlavorItemDetail.new( json_data['flavor'] )
@@ -160,17 +154,11 @@ module Nocoah
             # @see get_server_detail_list
             # @see https://www.conoha.jp/docs/compute-get_vms_detail_specified.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-server-details-detail#show-server-details
-            def get_server_detail( server_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}", header: headers )
-                raise APIError, message: "Failed to get server (server_id: #{server_id}) detail item.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+            def get_server_detail( server_id )        
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}",
+                    error_message: "Failed to get server item detail (server_id: #{server_id})."
+                )
                 return nil unless json_data.key?( 'server' )
 
                 Types::Compute::ServerItemDetail.new( json_data['server'] )
@@ -244,16 +232,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_images_detail_specified.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-image-details-detail#show-image-details
             def get_image_detail( image_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/images/#{image_id}", header: headers )
-                raise APIError, message: "Failed to get image (image_id: #{image_id}) detail item.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/images/#{image_id}",
+                    error_message: "Failed to get image item detail (image_id: #{image_id})."
+                )
                 return nil unless json_data.key?( 'image' )
 
                 Types::Compute::ImageItemDetail.new( json_data['image'] )
@@ -323,19 +305,13 @@ module Nocoah
                     server_options[:user_data] = Types::Common.to_b( options['encode_startup_script'] ) ? Base64.encode64( File.read( options[:startup_script_path] ) ) : File.read( options[:startup_script_path] )
                 end
 
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    server: server_options
-                }
-                
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to add virtual machine (image_id: #{image_id}, flavor_id: #{flavor_id}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post(
+                    "/#{@identity.config.tenant_id}/servers",
+                    body: {
+                        server: server_options
+                    },
+                    error_message: "Failed to create server (image_id: #{image_id}, flavor_id: #{flavor_id}, options: #{options})."
+                )
                 return nil unless json_data.key?( 'server' )
 
                 Types::Compute::CreateServerResult.new( json_data['server'] )
@@ -353,16 +329,12 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-delete_vm.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=delete-server-detail#delete-server
             def delete_server( server_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}", header: headers )
-                raise APIError, message: "Failed to delete virtual machine (server_id: #{server_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                server_id
+                api_delete(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}",
+                    error_message: "Failed to delete virtual machine (server_id: #{server_id})."
+                ) do | res |
+                    server_id
+                end
             end
 
             # Launches the virtual machine
@@ -425,20 +397,14 @@ module Nocoah
                 }
                 rebuild_options[:adminPass] = options[:adminPass] if options.key?( :adminPass )
                 rebuild_options[:key_name] = options[:key_name] if options.key?( :key_name )
-
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    rebuild: rebuild_options
-                }
-                
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to rebuild virtual machine (server_id: #{server_id}, image_id: #{image_id}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                        
+                json_data = api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    body: {
+                        rebuild: rebuild_options
+                    },
+                    error_message: "Failed to rebuild virtual machine (server_id: #{server_id}, image_id: #{image_id}, options: #{options})."
+                )
                 return nil unless json_data.key?( 'server' )
 
                 Types::Compute::RebuildServerResult.new( json_data['server'] )
@@ -461,21 +427,17 @@ module Nocoah
             # @see https://www.conoha.jp/vps/pricing/
             # @see https://developer.openstack.org/api-ref/compute/?expanded=resize-server-resize-action-detail#resize-server-resize-action
             def resize_server( server_id, flavor_id: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    resize: {
-                        flavorRef: flavor_id
-                    }
-                }.to_json
-                
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body )
-                raise APIError, message: "Failed to resize virtual machine (server_id: #{server_id}, flavor_id: #{flavor_id}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                server_id
+                api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    body: {
+                        resize: {
+                            flavorRef: flavor_id
+                        }
+                    },
+                    error_message: "Failed to resize virtual machine (server_id: #{server_id}, flavor_id: #{flavor_id}, options: #{options})."
+                ) do | res |
+                    server_id
+                end
             end
 
             # Confirms resize the virtual machine
@@ -492,19 +454,15 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-vm_resize_confirm.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=confirm-resized-server-confirmresize-action-detail#confirm-resized-server-confirmresize-action
             def confirm_resize_server( server_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    confirmResize: nil
-                }.to_json
-                
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body )
-                raise APIError, message: "Failed to confirm resize virtual machine (server_id: #{server_id}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                server_id
+                api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action", 
+                    body: {
+                        confirmResize: nil
+                    },
+                    error_message: "Failed to confirm resize virtual machine (server_id: #{server_id}, options: #{options})."
+                ) do | res |
+                    server_id
+                end
             end
 
             # Reverts resize the virtual machine
@@ -521,19 +479,15 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-vm_resize_revert.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=revert-resized-server-revertresize-action-detail#revert-resized-server-revertresize-action
             def revert_resize_server( server_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    revertResize: nil
-                }.to_json
-                
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body )
-                raise APIError, message: "Failed to revert resize virtual machine (server_id: #{server_id}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                server_id
+                api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    body: {
+                        revertResize: nil
+                    },
+                    error_message: "Failed to revert resize virtual machine (server_id: #{server_id}, options: #{options})."
+                ) do | res |
+                    server_id
+                end
             end
 
             # Gets the connection URL of VNC html5 console client (noVNC).
@@ -600,21 +554,17 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-create_image.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=create-image-createimage-action-detail#create-image-createimage-action
             def create_server_image( server_id, image_name: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    createImage: {
-                        name: image_name
-                    }
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to create server image (server_id: #{server_id}, image_name: #{image_name}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-
-                server_id
+                api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action", 
+                    body: {
+                        createImage: {
+                            name: image_name
+                        }
+                    },
+                    error_message: "Failed to create server image (server_id: #{server_id}, image_name: #{image_name})."
+                ) do | res |
+                    server_id
+                end
             end
 
             # Changes the storage controller.
@@ -674,19 +624,15 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/compute-vnc_key_map.html
             def change_key_map( server_id, vnc_keymap: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    vncKeymap: vnc_keymap
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to change console key map (server_id: #{server_id}, vncKeymap: #{vnc_keymap}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-
-                server_id
+                api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action", 
+                    body: {
+                        vncKeymap: vnc_keymap
+                    },
+                    error_message: "Failed to change console key map (server_id: #{server_id}, vncKeymap: #{vnc_keymap})."
+                ) do | res |
+                    server_id
+                end
             end
 
             # Mounts a ISO image to virtual machine.
@@ -701,19 +647,15 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/compute-insert_iso_image.html
             def mount_iso_image( server_id, iso_path: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    mountImage: iso_path
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body )
-                raise APIError, message: "Failed to mount (server_id: #{server_id}, iso_path: #{iso_path}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-
-                server_id
+                api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    body: {
+                        mountImage: iso_path
+                    },
+                    error_message: "Failed to mount (server_id: #{server_id}, iso_path: #{iso_path})."
+                ) do | res |
+                    server_id
+                end
             end
 
             # Unmounts the ISO image from virtual machine.
@@ -727,19 +669,15 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/compute-eject_iso_image.html
             def unmount_iso_image( server_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    unmountImage: ""
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body )
-                raise APIError, message: "Failed to unmount (server_id: #{server_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-
-                server_id
+                api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action", 
+                    body: {
+                        unmountImage: ""
+                    },
+                    error_message: "Failed to unmount (server_id: #{server_id})." 
+                ) do | res |
+                    server_id
+                end
             end
 
             # Gets a security group list assigned to the virtual machine
@@ -751,16 +689,10 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/compute-get_secgroups_status.html
             def get_security_group_list( server_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/os-security-groups", header: headers )
-                raise APIError, message: "Failed to get security group list (server_id: #{server_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-security-groups",
+                    error_message: "Failed to get security group list (server_id: #{server_id})."
+                )
             end
 
             # Gets a key-pair list.
@@ -772,16 +704,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_keypairs.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=list-keypairs-detail#list-keypairs
             def get_keypair_list
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/os-keypairs", header: headers )
-                raise APIError, message: "Failed to get key-pair list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( 
+                    "/#{@identity.config.tenant_id}/os-keypairs", 
+                    error_message: "Failed to get key-pair list."
+                )
                 return [] unless json_data.key?( 'keypairs' )
 
                 json_data['keypairs'].map() do | keypair |
@@ -789,7 +715,7 @@ module Nocoah
                 end
             end
 
-            # Gets a key-pair detail item.
+            # Gets a key-pair item detail.
             #
             # @return [Nocoah::Types::Compute::KeyPairItemDetail]       When succeeded, key-pair detail item.
             # @raise [Nocoah::APIError]                                 When failed.
@@ -798,16 +724,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_keypairs_detail_specified.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-keypair-details-detail#show-keypair-details
             def get_keypair_detail( keypair_name )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/os-keypairs/#{keypair_name}", header: headers )
-                raise APIError, message: "Failed to get key-pair detail item (keypair_name: #{keypair_name}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/os-keypairs/#{keypair_name}", 
+                    error_message: "Failed to get key-pair item detail (keypair_name: #{keypair_name})." 
+                )
                 return nil unless json_data.key?( 'keypair' )
 
                 Types::Compute::KeyPairItemDetail.new( json_data['keypair'] )
@@ -828,26 +748,22 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-add_keypair.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=create-or-import-keypair-detail#create-or-import-keypair
             def add_keypair( keypair_name, public_key: nil, public_key_path: nil )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
                 body = {
                     keypair: {
                         name: keypair_name
                     }
                 }
-                if public_key != nil
+                if !public_key.nil?
                     body[:keypair][:public_key] = public_key
-                elsif public_key_path != nil
+                elsif !public_key_path.nil?
                     body[:keypair][:public_key] = File.read( public_key_path )
                 end
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/os-keypairs", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to add key-pair (keypair_name: #{keypair_name}, public_key: #{public_key}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
-                json_data = JSON.parse( res.body )
+                json_data = api_post( 
+                    "/#{@identity.config.tenant_id}/os-keypairs",
+                    body: body
+                    error_message: "Failed to add key-pair (keypair_name: #{keypair_name}, public_key: #{public_key}, public_key_path: #{public_key_path})."
+                )
                 return nil unless json_data.key?( 'keypair' )
 
                 Types::Compute::AddKeyPairResult.new( json_data['keypair'] )
@@ -863,16 +779,12 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-delete_keypair.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=create-or-import-keypair-detail#create-or-import-keypair
             def delete_keypair( keypair_name )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/#{@identity.config.tenant_id}/os-keypairs/#{keypair_name}", header: headers )
-                raise APIError, message: "Failed to delete key-pair (keypair_name: #{keypair_name}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                keypair_name
+                api_delete(
+                    "#{@endpoint}/#{@identity.config.tenant_id}/os-keypairs/#{keypair_name}",
+                    error_message: "Failed to delete key-pair (keypair_name: #{keypair_name})."
+                ) do | res |
+                    keypair_name
+                end
             end
 
             # Gets a attached volume list.
@@ -886,16 +798,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_volume_attachments.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=list-volume-attachments-for-an-instance-detail#list-volume-attachments-for-an-instance
             def get_attached_volume_list( server_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments", header: headers )
-                raise APIError, message: "Failed to get attached volume list (server_id: #{server_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments",
+                    error_message: "Failed to get attached volume list (server_id: #{server_id})."
+                )
                 return [] unless json_data.key?( 'volumeAttachments' )
 
                 json_data['volumeAttachments'].map do | volume |
@@ -915,16 +821,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_volume_attachment_specified.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-a-detail-of-a-volume-attachment-detail#show-a-detail-of-a-volume-attachment
             def get_attached_volume_item( server_id, attachment_id: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments/#{attachment_id}", header: headers )
-                raise APIError, message: "Failed to get attached volume item (server_id: #{server_id}, attachment_id: #{attachment_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments/#{attachment_id}",
+                    error_message: "Failed to get attached volume item (server_id: #{server_id}, attachment_id: #{attachment_id})."
+                )
                 return nil unless json_data.key?( 'volumeAttachment' )
 
                 Types::Compute::AttachedVolumeItem.new( json_data['volumeAttachment'] )
@@ -946,22 +846,16 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-attach_volume.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=attach-a-volume-to-an-instance-detail#attach-a-volume-to-an-instance
             def attach_volume( server_id, volume_id: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    volumeAttachment: {
-                        volumeId: volume_id,
-                        device: "/dev/vdb"
-                    }
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to get attach volume (server_id: #{server_id}, volume_id: #{volume_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments", 
+                    body: {
+                        volumeAttachment: {
+                            volumeId: volume_id,
+                            device: "/dev/vdb"
+                        }
+                    }, 
+                    error_message: "Failed to get attach volume (server_id: #{server_id}, volume_id: #{volume_id})."
+                )
                 return nil unless json_data.key?( 'volumeAttachment' )
 
                 Nocoah::Types::Compute::AttachedVolumeItem.new( json_data['volumeAttachment'] )
@@ -981,16 +875,12 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-dettach_volume.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=detach-a-volume-from-an-instance-detail#detach-a-volume-from-an-instance
             def detach_volume( server_id, attachment_id: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments/#{attachment_id}", header: headers )
-                raise APIError, message: "Failed to get detach volume (server_id: #{server_id}, attachment_id: #{attachment_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                server_id
+                api_delete(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments/#{attachment_id}",
+                    error_message: "Failed to get detach volume (server_id: #{server_id}, attachment_id: #{attachment_id})."
+                ) do | res |
+                    server_id
+                end
             end
 
             # Gets a attached interface list.
@@ -1004,16 +894,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_attached_ports_list.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=list-port-interfaces-detail#list-port-interfaces
             def get_attached_interface_list( server_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/os-interface", header: headers )
-                raise APIError, message: "Failed to get attached interface list (server_id: #{server_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-interface",
+                    error_message: "Failed to get attached interface list (server_id: #{server_id})."
+                )
                 return [] unless json_data.key?( 'interfaceAttachments' )
 
                 json_data['interfaceAttachments'].map do | interface |
@@ -1033,16 +917,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_attached_port_specified.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-port-interface-details-detail#show-port-interface-details
             def get_attached_interface_item( server_id, port_id: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/os-interface/#{port_id}", header: headers )
-                raise APIError, message: "Failed to get attached interface item (server_id: #{server_id}, port_id: #{port_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-interface/#{port_id}",
+                    error_message: "Failed to get attached interface item (server_id: #{server_id}, port_id: #{port_id})."
+                )
                 return nil unless json_data.key?( 'interfaceAttachment' )
 
                 Types::Compute::AttachedInterfaceItem.new( json_data['interfaceAttachment'] )
@@ -1068,21 +946,15 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-attach_port.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=create-interface-detail#create-interface
             def attach_interface( server_id, port_id: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    interfaceAttachment: {
-                        port_id: port_id
-                    }
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to get attach volume (server_id: #{server_id}, volume_id: #{volume_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-interface",
+                    body: {
+                        interfaceAttachment: {
+                            port_id: port_id
+                        }
+                    },
+                    error_message: "Failed to get attach interface (server_id: #{server_id}, port_id: #{port_id})."
+                )
                 return nil unless json_data.key?( 'interfaceAttachment' )
 
                 Types::Compute::AttachedInterfaceItem.new( json_data['interfaceAttachment'] )
@@ -1098,23 +970,19 @@ module Nocoah
             #
             # @note Target virtual machine must be stopped.
             #
-            # @see attach_volume
-            # @see https://www.conoha.jp/docs/compute-dettach_volume.html
-            # @see https://developer.openstack.org/api-ref/compute/?expanded=detach-a-volume-from-an-instance-detail#detach-a-volume-from-an-instance
+            # @see attach_interface
+            # @see https://www.conoha.jp/docs/compute-dettach_port.html
+            # @see https://developer.openstack.org/api-ref/compute/?expanded=detach-interface-detail#detach-interface
             def detach_interface( server_id, port_id: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments/#{port_id}", header: headers )
-                raise APIError, message: "Failed to get detach volume (server_id: #{server_id}, port_id: #{port_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                server_id
+                api_delete(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-interface/#{port_id}",
+                    error_message: "Failed to get detach interface (server_id: #{server_id}, port_id: #{port_id})."
+                ) do | res |
+                    server_id
+                end
             end
 
-            # Gets the virtual machine metadata.
+            # Gets a virtual machine metadata.
             #
             # @param [String]   server_id       Server ID
             #
@@ -1124,16 +992,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_server_metadata.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=list-all-metadata-detail#list-all-metadata
             def get_server_metadata( server_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/metadata", header: headers )
-                raise APIError, message: "Failed to get metadata (server_id: #{server_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/metadata",
+                    error_message: "Failed to get metadata (server_id: #{server_id})."
+                )
                 json_data['metadata']
             end
 
@@ -1149,23 +1011,17 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-update_metadata.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=replace-metadata-items-detail#replace-metadata-items
             def set_server_metadata( server_id, **metadata )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    metadata: metadata
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/metadata", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to set metadata (server_id: #{server_id}, metadata: #{metadata}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/metadata",
+                    body: {
+                        metadata: metadata
+                    },
+                    "Failed to set metadata (server_id: #{server_id}, metadata: #{metadata})."
+                )
                 json_data['metadata']
             end
 
-            # Gets the virtual machine addresses.
+            # Gets a virtual machine addresses.
             #
             # @param [String]   server_id       Server ID
             #
@@ -1176,16 +1032,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_server_addresses.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=list-ips-detail#list-ips
             def get_server_addresses( server_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/ips", header: headers )
-                raise APIError, message: "Failed to get addresses (server_id: #{server_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/ips",
+                    error_message: "Failed to get addresses (server_id: #{server_id})."
+                )
                 return [] unless json_data.key?( 'addresses' )
                 
                 json_data['addresses'].map do | label, ips |
@@ -1193,7 +1043,7 @@ module Nocoah
                 end
             end
 
-            # Gets the virtual machine addresses.
+            # Gets a virtual machine addresses.
             #
             # @param [String]   server_id           Server ID
             # @param [String]   network_label       Network label
@@ -1205,22 +1055,16 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_server_addresses_by_network.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-ip-details-detail#show-ip-details
             def get_server_addresses_by_network( server_id, network_label: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/ips/#{network_label}", header: headers )
-                raise APIError, message: "Failed to get addresses (server_id: #{server_id}, network_label: #{network_label}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/ips/#{network_label}",
+                    error_message: "Failed to get addresses (server_id: #{server_id}, network_label: #{network_label})."
+                )
                 return nil unless json_data.key?( network_label )
                 
                 Types::Compute::ServerNetworkItem.new( network_label, json_data[network_label] )
             end
 
-            # Gets virtual machine cpu utilization rrd.
+            # Gets a virtual machine cpu utilization rrd.
             #
             # @param            [String]    server_id           Server ID
             # @param            [Hash]      url_query           Optional parameter
@@ -1291,16 +1135,10 @@ module Nocoah
             # @see get_backup_item
             # @see https://www.conoha.jp/docs/backup-get_backup_list.html
             def get_backup_list
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/backup", header: headers )
-                raise APIError, message: "Failed to get backup list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/backup",
+                    error_message: "Failed to get backup list."
+                )
                 return [] unless json_data.key?( 'backup' )
                 
                 json_data['backup'].map do | bk |
@@ -1318,22 +1156,16 @@ module Nocoah
             # @see get_backup_list
             # @see https://www.conoha.jp/docs/backup-get_backup_list_detailed.html
             def get_backup_item( backup_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/backup/#{backup_id}", header: headers )
-                raise APIError, message: "Failed to get backup item (backup_id: #{backup_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/backup/#{backup_id}",
+                    error_message: "Failed to get backup item (backup_id: #{backup_id})."
+                )
                 return nil unless json_data.key?( 'backup' )
                 
                 Types::Compute::BackupItem.new( json_data['backup'] )
             end
 
-            # Starts backup.
+            # Starts a backup.
             #
             # @param [String]   server_id       Server ID
             #
@@ -1346,24 +1178,18 @@ module Nocoah
             # @see https://www.conoha.jp/docs/backup-start_backup.html
             # @see https://www.conoha.jp/vps/pricing/
             def start_server_backup( server_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    backup: {
-                        instance_id: server_id
-                    }
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/backup", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to start backup (server_id: #{server_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post(
+                    "/#{@identity.config.tenant_id}/backup",
+                    body: {
+                        backup: {
+                            instance_id: server_id
+                        }
+                    },
+                    error_message:  "Failed to start backup (server_id: #{server_id})."
+                )
             end
 
-            # Ends backup.
+            # Ends the backup.
             #
             # @param [String]   backup_id       Backup ID to stop backup
             #
@@ -1375,16 +1201,12 @@ module Nocoah
             # @see start_server_backup
             # @see https://www.conoha.jp/docs/backup-end_backup.html
             def end_server_backup( backup_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/#{@identity.config.tenant_id}/backup/#{backup_id}", header: headers )
-                raise APIError, message: "Failed to stop backup (backup_id: #{backup_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                backup_id
+                api_delete(
+                    "/#{@identity.config.tenant_id}/backup/#{backup_id}",
+                    error_message: "Failed to stop backup (backup_id: #{backup_id})."
+                ) do | res |
+                    backup_id
+                end
             end
 
             # Restores from the backup.
@@ -1399,21 +1221,17 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/backup-restore_backup.html
             def restore_server_backup( backup_id, backuprun_id: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    restore: {
-                        backuprun_id: backuprun_id
-                    }
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/backup/#{backup_id}/action", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to restore backup (backup_id: #{backup_id}, backuprun_id: #{backuprun_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                backup_id
+                api_post(
+                    "/#{@identity.config.tenant_id}/backup/#{backup_id}/action",
+                    body: {
+                        restore: {
+                            backuprun_id: backuprun_id
+                        }
+                    },
+                    error_message: "Failed to restore backup (backup_id: #{backup_id}, backuprun_id: #{backuprun_id})."
+                ) do | res |
+                    backup_id
+                end
             end
 
             # Saves the backup to an image.
@@ -1429,22 +1247,18 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/backup-backup_to_image_object.html
             # def save_server_backup_to_image( backup_id, backuprun_id:, image_name: )
-            #     headers = {
-            #         Accept: "application/json",
-            #         'X-Auth-Token': @identity.api_token
-            #     }
-            #     body = {
-            #         createImage: {
-            #             backuprun_id: backuprun_id,
-            #             image_name: image_name
-            #         }
-            #     }
-
-            #     http_client = HTTPClient.new;
-            #     res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/backup/#{backup_id}/action", header: headers, body: body.to_json )
-            #     raise APIError, message: "Failed to save backup (backup_id: #{backup_id}, backuprun_id: #{backuprun_id}, image_name: #{image_name}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-            #     backup_id
+            #     api_post(
+            #         "/#{@identity.config.tenant_id}/backup/#{backup_id}/action",
+            #         body: {
+            #             createImage: {
+            #                 backuprun_id: backuprun_id,
+            #                 image_name: image_name
+            #             }
+            #         },
+            #         error_message: "Failed to save backup (backup_id: #{backup_id}, backuprun_id: #{backuprun_id}, image_name: #{image_name})."
+            #     ) do | res |
+            #         backup_id
+            #     end
             # end
 
             # Gets a ISO image list.
@@ -1454,17 +1268,10 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/compute-iso-list-show.html
             def get_iso_image_list
-                headers = {
-                    'Content-Type': "application/json",
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/iso-images", header: headers )
-                raise APIError, message: "Failed to get ISO image list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/#{@identity.config.tenant_id}/iso-images",
+                    error_message: "Failed to get ISO image list."
+                )
             end
 
             private
@@ -1480,19 +1287,10 @@ module Nocoah
             # @return [Hash]                When succeeded, flavor list.
             # @raise [Nocoah::APIError]     When failed.
             def get_flavor_list_core( is_detail = false, **url_query )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                uri = URI.parse( "#{@endpoint}/#{@identity.config.tenant_id}/flavors#{is_detail ? "/detail" : ""}" )
+                uri = URI.parse( "/#{@identity.config.tenant_id}/flavors#{is_detail ? "/detail" : ""}" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
-
-                http_client = HTTPClient.new;
-                res = http_client.get( uri.to_s, header: headers )
-                raise APIError, message: "Failed to get flavor #{is_detail ? "detail list" : "list"}.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
-                json_data = JSON.parse( res.body )
+                api_get( uri.to_s, error_message: "Failed to get flavor #{is_detail ? "detail list" : "list"} (url_query: #{url_query})." )
             end
 
             # Gets a virtual machine list.
@@ -1511,10 +1309,7 @@ module Nocoah
             # @raise [Nocoah::APIError]     When failed.
             # @raise [ArgmentError]         When specified 'changes-since' is invalid type.
             def get_server_list_core( is_detail = false, **url_query )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
+                url_query_org = url_query.dup
                 if url_query.key?( :'changes-since' )
                     if url_query[:'changes-since'].kind_of?( String )
                         url_query[:'changes-since'] = DateTime.parse( url_query[:'changes-since'] ).iso8601
@@ -1527,12 +1322,8 @@ module Nocoah
 
                 uri = URI.parse( "#{@endpoint}/#{@identity.config.tenant_id}/servers#{is_detail ? "/detail" : ""}" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
-
-                http_client = HTTPClient.new;
-                res = http_client.get( uri.to_s, header: headers )
-                raise APIError, message: "Failed to get server #{is_detail ? "detail list" : "list"}.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
-                json_data = JSON.parse( res.body )
+                api_get( uri.to_s, error_message: "Failed to get server #{is_detail ? "detail list" : "list"} (url_query: #{url_query_org})." )
             end
 
             # Gets a image list.
@@ -1550,10 +1341,7 @@ module Nocoah
             # @raise [Nocoah::APIError]     When failed.
             # @raise [ArgmentError]         When specified 'changes-since' is invalid type.
             def get_image_list_core( is_detail = false, **url_query )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
+                url_query_org = url_query.dup
                 if url_query.key?( :'changes-since' )
                     if url_query[:'changes-since'].kind_of?( String )
                         url_query[:'changes-since'] = DateTime.parse( url_query[:'changes-since'] ).iso8601
@@ -1567,11 +1355,7 @@ module Nocoah
                 uri = URI.parse( "#{@endpoint}/#{@identity.config.tenant_id}/images#{is_detail ? "/detail" : ""}" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
 
-                http_client = HTTPClient.new;
-                res = http_client.get( uri.to_s, header: headers )
-                raise APIError, message: "Failed to get image #{is_detail ? "detail list" : "list"}.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                api_get( uri.to_s, error_message: "Failed to get image #{is_detail ? "detail list" : "list"} (url_query: #{url_query_org})." )
             end
 
             # Launches, restarts or stops the virtual machine
@@ -1582,27 +1366,24 @@ module Nocoah
             # @return [String]              When succeeded, server ID.
             # @raise [Nocoah::APIError]     When failed.
             def server_action_core( server_id, action_name )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
                 case action_name
                 when "launch" then
-                    action_param = { 'os-start': nil }
+                    body = { 'os-start': nil }
                 when "restart" then
-                    action_param = { reboot: { type: "SOFT" } }
+                    body = { reboot: { type: "SOFT" } }
                 when "stop" then
-                    action_param = { 'os-stop': nil }
+                    body = { 'os-stop': nil }
                 when "force-stop" then
-                    action_param = { 'os-stop': { force_shutdown: true } }
+                    body = { 'os-stop': { force_shutdown: true } }
                 end
-                body = action_param.to_json
 
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body )
-                raise APIError, message: "Failed to #{action_name} virtual machine (server_id: #{server_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                server_id
+                api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    body: body,
+                    error_message: "Failed to #{action_name} virtual machine (server_id: #{server_id})."
+                ) do | res |
+                    server_id
+                end
             end
 
             # Gets a console connection url.
@@ -1613,17 +1394,11 @@ module Nocoah
             # @return [String]              When succeeded, console connection url.
             # @raise [Nocoah::APIError]     When failed.
             def get_console_url_core( server_id, target_console: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = target_console.to_json
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body )
-                raise APIError, message: "Failed to get console connection url (server_id: #{server_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    body: target_console,
+                    error_message: "Failed to get console connection url (server_id: #{server_id})."
+                )
 
                 json_data['console']['url']
             end
@@ -1636,17 +1411,13 @@ module Nocoah
             # @return [String]              When succeeded, server ID.
             # @raise [Nocoah::APIError]     When failed.
             def change_vm_hardware_core( server_id, target_hw: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = target_hw.to_json
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/action", header: headers, body: body )
-                raise APIError, message: "Failed to change hardware (server_id: #{server_id}, target_hw: #{target_hw}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-
-                server_id
+                api_post(
+                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    body: target_hw,
+                    error_message: "Failed to change hardware (server_id: #{server_id}, target_hw: #{target_hw})."
+                ) do | res |
+                    server_id
+                end
             end
 
             # Gets a virtual machine rrd.
@@ -1664,23 +1435,14 @@ module Nocoah
             # @return [Nocoah::Types::Common::RRD]      When succeeded, virtual machine rrd.
             # @raise [Nocoah::APIError]                 When failed.
             def get_server_rrd_core( server_id, target_rrd:, error_message:, **url_query )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
                 # When specified in Date, Time or DateTime type, converts to UNIX time.
                 url_query[:start_date_raw] = url_query[:start_date_raw].to_i if Types::Common.kind_of_date_or_time?( url_query[:start_date_raw] )
                 url_query[:end_date_raw] = url_query[:end_date_raw].to_i if Types::Common.kind_of_date_or_time?( url_query[:end_date_raw] )
 
                 uri = URI.parse( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/rrd/#{target_rrd}" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
-
-                http_client = HTTPClient.new;
-                res = http_client.get( uri.to_s, header: headers )
-                raise APIError, message: error_message, http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
-                json_data = JSON.parse( res.body )
+                json_data = api_get( uri.to_s, error_message: error_message )
                 return nil unless json_data.key?( target_rrd )
                 
                 Types::Common::RRD.new( target_rrd, json_data[target_rrd] )

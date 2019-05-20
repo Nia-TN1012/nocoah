@@ -40,19 +40,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/image-get_images_list.html
             # @see https://developer.openstack.org/api-ref/image/v2/index.html?expanded=list-images-detail#list-images
             def get_image_list( **url_query )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
                 uri = URI.parse( "#{@endpoint}/images" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
-
-                http_client = HTTPClient.new;
-                res = http_client.get( uri.to_s, header: headers )
-                raise APIError, message: "Failed to get image list (url_query: #{url_query}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
-                json_data = JSON.parse( res.body )
+                json_data = api_get( uri.to_s, error_message: "Failed to get image list (url_query: #{url_query})." )
                 return [] unless json_data.key?( 'images' )
 
                 json_data['images'].map do | image |
@@ -71,16 +62,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/image-get_images_detail_specified.html
             # @see https://developer.openstack.org/api-ref/image/v2/index.html?expanded=show-image-detail#show-image
             def get_image_item( image_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/images/#{image_id}", header: headers )
-                raise APIError, message: "Failed to get image item (image_id: #{image_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/images/#{image_id}",
+                    error_message: "Failed to get image item (image_id: #{image_id})."
+                )
                 Types::Image::ImageItem.new( json_data )
             end
 
@@ -150,16 +135,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/image-get_members_list.html
             # @see https://developer.openstack.org/api-ref/image/v2/index.html?expanded=show-image-detail#show-image
             def get_image_member_list( image_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/images/#{image_id}/members", header: headers )
-                raise APIError, message: "Failed to get image member list (image_id: #{image_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/images/#{image_id}/members",
+                    error_message: "Failed to get image member list (image_id: #{image_id})."
+                )
                 return [] unless json_data.key?( 'members' )
 
                 json_data['members'].map do | member |
@@ -177,16 +156,12 @@ module Nocoah
             # @see https://www.conoha.jp/docs/image-remove_image.html
             # @see https://developer.openstack.org/api-ref/image/v2/index.html?expanded=delete-image-detail#delete-image
             def delete_image( image_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/images/#{image_id}", header: headers )
-                raise APIError, message: "Failed to delete image (image_id: #{image_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                image_id
+                api_delete(
+                    "/images/#{image_id}",
+                    error_message: "Failed to delete image (image_id: #{image_id})."
+                ) do | res |
+                    image_id
+                end
             end
 
             # Sets the image storage quota of the region set in {Nocoah::Config}.
@@ -201,22 +176,16 @@ module Nocoah
             # @see https://www.conoha.jp/docs/image-set_quota.html
             # @see https://www.conoha.jp/vps/pricing/
             def set_image_quota( image_quota )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    quota: {
-                        "#{@identity.config.region}_image_size": image_quota
-                    }
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/quota", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to set image quota (image_quota: #{image_quota}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-
-                json_data = JSON.parse( res.body )
-                return json_data['quota']["#{@identity.config.region}_image_size"]
+                json_data = api_post(
+                    "/quota",
+                    body: {
+                        quota: {
+                            "#{@identity.config.region}_image_size": image_quota
+                        }
+                    },
+                    error_message: "Failed to set image quota (image_quota: #{image_quota})."
+                )
+                json_data['quota']["#{@identity.config.region}_image_size"]
             end
 
             # Gets the image storage quota of the region set in {Nocoah::Config}.
@@ -226,17 +195,8 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/image-set_quota.html
             def get_image_quota
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/quota", header: headers )
-                raise APIError, message: "Failed to get image quota info.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-
-                json_data = JSON.parse( res.body )
-                return json_data['quota']["#{@identity.config.region}_image_size"]
+                json_data = api_get( "/quota", error_message: "Failed to get image quota info." )
+                json_data['quota']["#{@identity.config.region}_image_size"]
             end
 
             private
@@ -249,11 +209,6 @@ module Nocoah
             # @raise [ArgumentError]        When target_schema is invalid value.
             # @raise [Nocoah::APIError]     When failed.
             def get_image_schema_core( target_schema )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
                 case target_schema
                 when "image"
                     path = "image"
@@ -270,12 +225,11 @@ module Nocoah
                 else
                     raise ArgumentError, "Invalid target schema: #{target_schema}"
                 end
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/schemas/#{path}", header: headers )
-                raise APIError, message: "Failed to get #{name} schema.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
-                JSON.parse( res.body )
+                api_get(
+                    "/schemas/#{path}",
+                    error_message: "Failed to get #{name} schema."
+                )
             end
 
         end

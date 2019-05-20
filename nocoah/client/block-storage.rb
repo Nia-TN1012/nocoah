@@ -26,16 +26,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/cinder-get_volume_types_list.html
             # @see https://developer.openstack.org/api-ref/block-storage/v2/?expanded=list-all-volume-types-for-v2-detail#list-all-volume-types-for-v2
             def get_volume_type_list
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/types", header: headers )
-                raise APIError, message: "Failed to get volume type list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/#{@identity.config.tenant_id}/types", error_message: "Failed to get volume type list." )
                 return [] unless json_data.key?( 'volume_types' )
 
                 json_data['volume_types'].map do | volume_type |
@@ -54,16 +45,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/cinder-get_volume_type_specified.html
             # @see https://developer.openstack.org/api-ref/block-storage/v2/?expanded=show-volume-type-details-for-v2-detail#show-volume-type-details-for-v2
             def get_volume_type_item( volume_type_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/types/#{volume_type_id}", header: headers )
-                raise APIError, message: "Failed to get volume type item (volume_type_id: #{volume_type_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/#{@identity.config.tenant_id}/types/#{volume_type_id}", error_message: "Failed to get volume type item (volume_type_id: #{volume_type_id})." )
                 return nil unless json_data.key?( 'volume_type' )
 
                 Types::BlockStorage::VolumeTypeItem.new( json_data['volume_type'] )
@@ -97,7 +79,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/cinder-get_volumes_detail.html
             # @see https://developer.openstack.org/api-ref/block-storage/v2/?expanded=list-volumes-with-details-detail#list-volumes-with-details
             def get_volume_detail_list
-                json_data = get_volume_list_core( true )
+                json_data = api_get( "/#{@identity.config.tenant_id}/volumes", error_message: "Failed to get volume list." )
                 return [] unless json_data.key?( 'volumes' )
 
                 json_data['volumes'].map do | volume |
@@ -115,16 +97,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/cinder-get_volume_detail_specified.html
             # @see https://developer.openstack.org/api-ref/block-storage/v2/?expanded=show-volume-details-detail#show-volume-details
             def get_volume_detail( volume_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/volumes/#{volume_id}", header: headers )
-                raise APIError, message: "Failed to get volume item (volume_id: #{volume_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/#{@identity.config.tenant_id}/volumes/detail", error_message: "Failed to get volume detail list." )
                 return nil unless json_data.key?( 'volume' )
 
                 Types::BlockStorage::VolumeItemDetail.new( json_data['volume'] )
@@ -154,21 +127,19 @@ module Nocoah
             def create_volume( volume_id: nil, name: nil, size:, **options )
                 raise ArgumentError, "You must specify a valid value for volume_id or name." if volume_id.nil? && name.nil?
 
+                options_org = options.dup
                 headers = {
                     Accept: "application/json",
                     'X-Auth-Token': @identity.api_token
                 }
                 options[:source_volid] = volume_id unless volume_id.nil?
                 options[:name] = name unless name.nil?
+                options[:size] = size
                 body = {
                     volume: options
                 }
 
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/volumes", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to create volume (volume_id: #{volume_id}, name: #{name}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post( "/#{@identity.config.tenant_id}/volumes", body: body, error_message: "Failed to create volume (volume_id: #{volume_id}, name: #{name}, size: #{size}, options: #{options_org})." )
                 return nil unless json_data.key?( 'volume' )
 
                 Types::BlockStorage::VolumeItemDetail.new( json_data['volume'] )
@@ -186,16 +157,9 @@ module Nocoah
             # @see https://www.conoha.jp/docs/cinder-delete_volume.html
             # @see https://developer.openstack.org/api-ref/block-storage/v2/?expanded=delete-volume-detail#delete-volume
             def delete_volume( volume_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/#{@identity.config.tenant_id}/volumes/#{volume_id}", header: headers )
-                raise APIError, message: "Failed to delete volume (volume_id: #{volume_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                volume_id
+                api_delete( "/#{@identity.config.tenant_id}/volumes/#{volume_id}", error_message: "Failed to delete volume (volume_id: #{volume_id})." ) do | res |
+                    volume_id
+                end
             end
 
             # Saves the volume as an image.
@@ -212,41 +176,7 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/cinder-save_volume.html
             def save_volume_to_image( volume_id, image_name:, **options )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                options[:name] = image_name
-                body = {
-                    'os-volume_upload_image': options
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/#{@identity.config.tenant_id}/volumes/#{volume_id}", header: headers )
-                raise APIError, message: "Failed to save volume (volume_id: #{volume_id}, image_name: #{image_name}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
-            end
-
-            private
-
-            # Gets volume list.
-            #
-            # @param [Boolean]   is_detail      When true, gets detail list
-            #
-            # @return [Hash]                When succeeded, volume list.
-            # @raise [Nocoah::APIError]     When failed.
-            def get_volume_list_core( is_detail = false )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/volumes#{is_detail ? "/detail" : ""}", header: headers )
-                raise APIError, message: "Failed to get volume #{is_detail ? "detail list" : "list"}.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/#{@identity.config.tenant_id}/volumes/#{volume_id}", error_message: "Failed to save volume (volume_id: #{volume_id}, image_name: #{image_name}, options: #{options_org})." )
             end
 
         end

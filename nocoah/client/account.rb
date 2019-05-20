@@ -25,15 +25,7 @@ module Nocoah
             # @see get_order_item_detail
             # @see https://www.conoha.jp/docs/account-order-item-list.html
             def get_order_items_list
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/order-items", header: headers )
-                raise APIError, message: "Failed to get order-items list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/#{@identity.config.tenant_id}/order-items", error_message: "Failed to get order-item list." )
                 return [] unless json_data.key?( 'order_items' )
                 
                 json_data['order_items'].map() do | item |
@@ -51,15 +43,7 @@ module Nocoah
             # @see get_order_items_list
             # @see https://www.conoha.jp/docs/account-order-item-detail-specified.html
             def get_order_item_detail( item_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/order-items/#{item_id}", header: headers )
-                raise APIError, message: "Failed to get order-item info.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/#{@identity.config.tenant_id}/order-items/#{item_id}", error_message: "Failed to get order-item (item_id: #{item_id})." )
                 return nil unless json_data.key?( 'order_item' )
 
                 Types::Account::OrderItemDetail.new( json_data['order_item'] )
@@ -73,15 +57,7 @@ module Nocoah
             # @see get_payment_summary
             # @see https://www.conoha.jp/docs/account-payment-histories.html
             def get_payment_history
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/payment-history", header: headers )
-                raise APIError, message: "Failed to get payment-history.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/#{@identity.config.tenant_id}/payment-history", error_message: "Failed to get payment-history." )
                 return [] unless json_data.key?( 'payment_history' )
                 
                 json_data['payment_history'].map() do | item |
@@ -97,15 +73,7 @@ module Nocoah
             # @see get_payment_history
             # @see https://www.conoha.jp/docs/account-payment-summary.html
             def get_payment_summary
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/payment-summary", header: headers )
-                raise APIError, message: "Failed to get payment-summary.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/#{@identity.config.tenant_id}/payment-summary", "Failed to get payment-summary." )
                 return nil unless json_data.key?( 'payment_summary' )
 
                 Types::Account::PaymentSummary.new( json_data['payment_summary'] )
@@ -113,24 +81,20 @@ module Nocoah
 
             # Gets a billing invoices list.
             #
-            # @param [Integer] offset   Acquisition start position
-            # @param [Integer] limit    Acquisition number
+            # @param            [Integer] url_query     URL query
+            # @option url_query [Integer] offset        (0) Acquisition start position
+            # @option url_query [Integer] limit         (1000) Acquisition number
             #
             # @return [Array<Nocoah::Types::Account::BillingInvoiceItem>]   When succeeded, billing invoices list.
             # @raise [Nocoah::APIError]                                     When failed.
             #
             # @see get_billing_invoice_detail
             # @see https://www.conoha.jp/docs/account-billing-invoices-list.html
-            def get_billing_invoices_list( offset: 0, limit: 1000 )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/billing-invoices?offset=#{offset}&limit=#{limit}", header: headers )
-                raise APIError, message: "Failed to get billing-invoices list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+            def get_billing_invoices_list( **url_query )
+                uri = URI.parse( "/#{@identity.config.tenant_id}/billing-invoices" )
+                uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
+
+                json_data = api_get( uri.to_s, error_message: "Failed to get billing-invoices list. (url_query: #{url_query})" )
                 return [] unless json_data.key?( 'billing_invoices' )
 
                 json_data['billing_invoices'].map() do | item |
@@ -148,15 +112,7 @@ module Nocoah
             # @see get_billing_invoices_list
             # @see https://www.conoha.jp/docs/account-billing-invoices-detail-specified.html
             def get_billing_invoice_detail( invoice_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/billing-invoices/#{invoice_id}", header: headers )
-                raise APIError, message: "Failed to get billing-invoice detail info.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/#{@identity.config.tenant_id}/billing-invoices/#{invoice_id}", error_message: "Failed to get billing-invoice detail item (invoice_id: #{invoice_id})." )
                 return [] unless json_data.key?( 'billing_invoice' ) || !json_data['billing_invoice'].key?( 'items' )
 
                 json_data['billing_invoice']['items'].map() do | item |
@@ -166,24 +122,20 @@ module Nocoah
 
             # Gets a notifications list.
             #
-            # @param [Integer] offset   Acquisition start position
-            # @param [Integer] limit    Acquisition number
+            # @param            [Integer] url_query     URL query
+            # @option url_query [Integer] offset        (0) Acquisition start position
+            # @option url_query [Integer] limit         (1000) Acquisition number
             #
             # @return [Array<Nocoah::Types::Account::NotificationItem>]     When succeeded, notifications list.
             # @raise [Nocoah::APIError]                                     When failed.
             #
             # @see get_notification_item
             # @see https://www.conoha.jp/docs/account-informations-list.html
-            def get_notifications_list( offset: 0, limit: 1000 )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/notifications?offset=#{offset}&limit=#{limit}", header: headers )
-                raise APIError, message: "Failed to get notifications list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+            def get_notifications_list( **url_query )
+                uri = URI.parse( "/#{@identity.config.tenant_id}/notifications" )
+                uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
+
+                json_data = api_get( uri.to_s, error_message: "Failed to get notifications list. (url_query: #{url_query})" )
                 return [] unless json_data.key?( 'notifications' )
 
                 json_data['notifications'].map() do | item |
@@ -201,15 +153,7 @@ module Nocoah
             # @see get_notifications_list
             # @see https://www.conoha.jp/docs/account-informations-detail-specified.html
             def get_notification_item( notification_code )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/#{@identity.config.tenant_id}/notifications/#{notification_code}", header: headers )
-                raise APIError, message: "Failed to get notification info.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/#{@identity.config.tenant_id}/notifications/#{notification_code}", error_message: "Failed to get notification item (notification_code: #{notification_code})." )
                 return nil unless json_data.key?( 'notification' )
 
                 Types::Account::NotificationItem.new( json_data['notification'] )
@@ -225,21 +169,13 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/account-informations-marking.html
             def set_read_status_notification( notification_code, read_status )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
                 body = {
                     notification: {
                         read_status: read_status,
                     }
-                }.to_json
-
-                http_client = HTTPClient.new;
-                res = http_client.put( "#{@endpoint}/#{@identity.config.tenant_id}/notifications/#{notification_code}", header: headers, body: body )
-                raise APIError, message: "Failed to get notification info.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
+                }
         
-                json_data = JSON.parse( res.body )
+                json_data = api_post( "/#{@identity.config.tenant_id}/notifications/#{notification_code}", body: body, error_message: "Failed to set read status (notification_code: #{notification_code})." )
                 return nil unless json_data.key?( 'notification' )
 
                 Types::Account::NotificationItem.new( json_data['notification'] )
@@ -294,23 +230,14 @@ module Nocoah
             # @return [Nocoah::Types::Common::RRD]      When succeeded, object storage utilization rrd.
             # @raise [Nocoah::APIError]                 When failed.
             def get_object_storage_rrd_core( target_rrd, **url_query )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                
                 # When specified in Date, Time or DateTime type, converts to UNIX time.
                 url_query[:start_date_raw] = url_query[:start_date_raw].to_i if Types::Common.kind_of_date_or_time?( url_query[:start_date_raw] )
                 url_query[:end_date_raw] = url_query[:end_date_raw].to_i if Types::Common.kind_of_date_or_time?( url_query[:end_date_raw] )
 
-                uri = URI.parse( "#{@endpoint}/#{@identity.config.tenant_id}/object-storage/rrd/#{target_rrd}" )
+                uri = URI.parse( "/#{@identity.config.tenant_id}/object-storage/rrd/#{target_rrd}" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
-
-                http_client = HTTPClient.new;
-                res = http_client.get( uri, header: headers )
-                raise APIError, message: "Failed to get object storage #{target_rrd} utilization rrd.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
-                json_data = JSON.parse( res.body )
+                json_data = api_get( uri.to_s, "Failed to get object storage #{target_rrd} utilization rrd (url_query: #{url_query})." )
                 return nil unless json_data.key?( target_rrd )
 
                 Types::Common::RRD.new( target_rrd, json_data[target_rrd] )

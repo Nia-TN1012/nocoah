@@ -25,17 +25,8 @@ module Nocoah
             # @see get_network_item
             # @see https://www.conoha.jp/docs/neutron-get_networks_list.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=list-networks-detail#list-networks
-            def get_network_list
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/networks" , header: headers )
-                raise APIError, message: "Failed to get network list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+            def get_network_list        
+                json_data = api_get( "/networks", error_message: "Failed to get network list." )
                 return [] unless json_data.key?( 'networks' )
 
                 json_data['networks'].map do | network |
@@ -54,16 +45,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-get_networks_detail_specified.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=show-network-details-detail#show-network-details
             def get_network_item( network_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/networks/#{network_id}", header: headers )
-                raise APIError, message: "Failed to get network item (network_id: #{network_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/networks/#{network_id}",
+                    error_message: "Failed to get network item (network_id: #{network_id})."
+                )
                 return nil unless json_data.key?( 'network' )
 
                 Types::Network::NetworkItem.new( json_data['network'] )
@@ -77,16 +62,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-add_network.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=create-network-detail#create-network
             def create_network
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/networks" , header: headers )
-                raise APIError, message: "Failed to create network.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post( "/networks", error_message: "Failed to create network." )
                 return nil unless json_data.key?( 'network' )
 
                 Types::Network::NetworkItem.new( json_data['network'] )
@@ -102,16 +78,12 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-remove_network.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=delete-network-detail#delete-network
             def delete_network( network_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/networks/#{network_id}", header: headers )
-                raise APIError, message: "Failed to delete network (network_id: #{network_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                network_id
+                api_delete(
+                    "/networks/#{network_id}",
+                    error_message: "Failed to delete network (network_id: #{network_id})."
+                ) do | res |
+                    network_id
+                end
             end
 
             # Gets a port list.
@@ -123,16 +95,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-get_ports_list.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=list-ports-detail#list-ports
             def get_port_list
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/ports" , header: headers )
-                raise APIError, message: "Failed to get port list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/ports", error_message: "Failed to get port list." )
                 return [] unless json_data.key?( 'ports' )
 
                 json_data['ports'].map do | port |
@@ -151,16 +114,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-get_ports_detail_specified.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=show-port-details-detail#show-port-details
             def get_port_item( port_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/ports/#{port_id}", header: headers )
-                raise APIError, message: "Failed to get port item (port_id: #{port_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/ports/#{port_id}",
+                    error_message: "Failed to get port item (port_id: #{port_id})."
+                )
                 return nil unless json_data.key?( 'port' )
 
                 Types::Network::PortItem.new( json_data['port'] )
@@ -180,20 +137,15 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-add_port.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=create-port-detail#create-port
             def create_port( network_id, **options )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
+                options_org = options.dup
                 options[:network_id] = network_id
-                body = {
-                    port: options
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/ports" , header: headers, body: body.to_json )
-                raise APIError, message: "Failed to create port (network_id: #{network_id}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post(
+                    "/ports",
+                    body: {
+                        port: options
+                    },
+                    error_message: "Failed to create port (network_id: #{network_id}, options: #{options_org})."
+                )
                 return nil unless json_data.key?( 'port' )
 
                 Types::Network::PortItem.new( json_data['port'] )
@@ -230,19 +182,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-add_port.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=bulk-create-ports-detail#bulk-create-ports
             def bulk_create_port( ports )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    ports: ports
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/ports" , header: headers, body: body.to_json )
-                raise APIError, message: "Failed to create ports (ports: #{ports}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post( "/ports", body: { ports: ports }, error_message: "Failed to create ports (ports: #{ports})." )
                 return [] unless json_data.key?( 'ports' )
 
                 json_data['ports'].map do | port |
@@ -267,20 +207,13 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-update_port.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=update-port-detail#update-port
             def update_port( port_id, **options )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                options[:port_id] = port_id
-                body = {
-                    port: options
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.put( "#{@endpoint}/ports" , header: headers, body: body.to_json )
-                raise APIError, message: "Failed to update port (port_id: #{port_id}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_put(
+                    "/ports/#{port_id}",
+                    body: {
+                        port: options
+                    },
+                    error_message: "Failed to update port (port_id: #{port_id}, options: #{options})."
+                )
                 return nil unless json_data.key?( 'port' )
 
                 Types::Network::PortItem.new( json_data['port'] )
@@ -296,16 +229,9 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-remove_port.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=delete-port-detail#delete-port
             def delete_port( port_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/ports/#{port_id}", header: headers )
-                raise APIError, message: "Failed to delete port (port_id: #{port_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                port_id
+                api_delete( "/ports/#{port_id}", error_message: "Failed to delete port (port_id: #{port_id})." ) do | res |
+                    port_id
+                end
             end
 
             # Gets a subnet list.
@@ -317,16 +243,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-get_subnets_list.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=list-subnets-detail#list-subnets
             def get_subnet_list
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/subnets" , header: headers )
-                raise APIError, message: "Failed to get subnet list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/subnets", error_message: "Failed to get subnet list." )
                 return [] unless json_data.key?( 'subnets' )
 
                 json_data['subnets'].map do | subnet |
@@ -345,16 +262,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-get_subnets_detail_specified.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=show-subnet-details-detail#show-subnet-details
             def get_subnet_item( subnet_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/subnets/#{subnet_id}", header: headers )
-                raise APIError, message: "Failed to get subnet item (subnet_id: #{subnet_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( 
+                    "/subnets/#{subnet_id}", 
+                    error_message: "Failed to get subnet item (subnet_id: #{subnet_id})."
+                )
                 return nil unless json_data.key?( 'subnet' )
 
                 Types::Network::SubnetItem.new( json_data['subnet'] )
@@ -368,25 +279,21 @@ module Nocoah
             # @return [Nocoah::Types::Network::SubnetItem]      When succeeded, created subnet item.
             # @raise [Nocoah::APIError]                         When failed.
             #
+            # @note ConoHa: Creates subnet for local network.
+            #
             # @see https://www.conoha.jp/docs/neutron-add_subnet.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=create-subnet-detail#create-subnet
             def create_subnet( network_id, cidr: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    subnet: {
-                        network_id: network_id,
-                        cidr: cidr
-                    }
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/subnets" , header: headers, body: body.to_json )
-                raise APIError, message: "Failed to create subnet (network_id: #{network_id}, cidr: #{cidr}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post(
+                    "/subnets",
+                    body: {
+                        subnet: {
+                            network_id: network_id,
+                            cidr: cidr
+                        }
+                    },
+                    error_message: "Failed to create subnet (network_id: #{network_id}, cidr: #{cidr})."
+                )
                 return nil unless json_data.key?( 'subnet' )
 
                 Types::Network::SubnetItem.new( json_data['subnet'] )
@@ -394,35 +301,32 @@ module Nocoah
 
             # Purchases for an additional IP address and creates a new subnet.
             #
-            # @param [Integer] bitmask      Bit mask (ConoHa: 28..32) ( This parameter takes precedence. )
-            # @param [Integer] add_num      Number of purchase and create IPs (ConoHa: 1, 2, 4, 8, 16)
+            # @param [Integer] bitmask      Bit mask (Default: 32) (ConoHa: 28..32) ( This parameter takes precedence. )
+            # @param [Integer] add_num      Number of purchase and create IPs (Default: 1) (ConoHa: 1, 2, 4, 8, 16)
             #
             # @note ConoHa: The minimum usage period for additional IP addresses is 30 days.
             #
             # @return [Nocoah::Types::Network::SubnetItem]      When succeeded, created subnet item.
+            # @raise [Nocoah::ArgumentError]                    When specified or calculated ( from add_num ) bitmask is invalid.
             # @raise [Nocoah::APIError]                         When failed.
             #
             # @see https://www.conoha.jp/docs/neutron-add_subnet_for_addip.html
             # @see https://support.conoha.jp/v/setipv4/
             # @see https://www.conoha.jp/vps/pricing/
             def create_subnet_for_addtional_ip( bitmask: nil, add_num: nil )
+                add_num ||= 1
                 bitmask ||= 32 - Math.log2( add_num ).to_i
+                raise ArgumentError, "Invalid argments: bitmask: #{bitmask}, add_num: #{add_num}"
                 
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    allocateip: {
-                        bitmask: bitmask
-                    }
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/allocateips" , header: headers, body: body.to_json )
-                raise APIError, message: "Failed to create subnet for addtional IP (bitmask: #{bitmask}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post(
+                    "/allocateips",
+                    body: {
+                        allocateip: {
+                            bitmask: bitmask
+                        }
+                    },
+                    error_message: "Failed to create subnet for addtional IP (bitmask: #{bitmask}, add_num: #{add_num})."
+                )
                 return nil unless json_data.key?( 'subnet' )
 
                 Types::Network::SubnetItem.new( json_data['subnet'] )
@@ -437,16 +341,7 @@ module Nocoah
             # @see https://support.conoha.jp/v/loadbalancer/
             # @see https://www.conoha.jp/vps/pricing/
             def create_subnet_for_lb
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/lb/subnets" , header: headers )
-                raise APIError, message: "Failed to create subnet for LB.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post( "/lb/subnets", error_message: "Failed to create subnet for LB." )
                 return nil unless json_data.key?( 'subnet' )
 
                 Types::Network::SubnetItem.new( json_data['subnet'] )
@@ -462,16 +357,9 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-remove_subnet.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=delete-subnet-detail#delete-subnet
             def delete_subnet( subnet_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/subnets/#{subnet_id}", header: headers )
-                raise APIError, message: "Failed to delete subnet (subnet_id: #{subnet_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                subnet_id
+                api_delete( "/subnets/#{subnet_id}", error_message: "Failed to delete subnet (subnet_id: #{subnet_id})." ) do | res |
+                    subnet_id
+                end
             end
 
             # Gets a loadbalancer pool list.
@@ -483,16 +371,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-get_pools_list.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=list-pools-detail#list-pools
             def get_lb_pool_list
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/lb/pools" , header: headers )
-                raise APIError, message: "Failed to get loadbalancer pool list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/lb/pools", error_message: "Failed to get loadbalancer pool list." )
                 return [] unless json_data.key?( 'pools' )
 
                 json_data['pools'].map do | pool |
@@ -511,16 +390,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-get_pools_detail_specified.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=show-pool-details-detail#show-pool-details
             def get_lb_pool_item( pool_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/lb/pools/#{pool_id}", header: headers )
-                raise APIError, message: "Failed to get loadbalancer pool item (pool_id: #{pool_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/lb/pools/#{pool_id}",
+                    error_message: "Failed to get loadbalancer pool item (pool_id: #{pool_id})."
+                )
                 return nil unless json_data.key?( 'pool' )
 
                 Types::Network::PoolItem.new( json_data['pool'] )
@@ -537,30 +410,27 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/neutron-add_pool.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=create-pool-detail#create-pool
-            def create_lb_pool( name, subnet_id:, lb_method: )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    pool: {
-                        lb_method: lb_method,
-                        protocol: "TCP",
-                        name: name,
-                        subnet_id: subnet_id
-                    }
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/lb/pools", header: headers, body: body.to_json )
-                if res.status >= HTTP::Status::BAD_REQUEST
-                    json_data = JSON.parse( res.body ) rescue {}
-                    raise APIError, message: json_data['NeutronError']['message'], http_code: res.status if json_data.key?( 'NeutronError' )
-                    raise APIError, message: json_data['badRequest']['message'], http_code: res.status if json_data.key?( 'badRequest' )
-                    raise APIError, message: "Failed to create loadbalancer pool (name: #{name}, subnet_id: #{subnet_id}, lb_method: #{lb_method}).", http_code: res.status
+            def create_lb_pool( name, subnet_id:, lb_method: )        
+                json_data = api_post(
+                    "/lb/pools",
+                    body: {
+                        pool: {
+                            lb_method: lb_method,
+                            protocol: "TCP",
+                            name: name,
+                            subnet_id: subnet_id
+                        }
+                    },
+                    raise_api_failed: false
+                ) do | res |
+                    if res.status >= HTTP::Status::BAD_REQUEST
+                        json_data = JSON.parse( res.body ) rescue {}
+                        raise APIError, message: json_data['NeutronError']['message'], http_code: res.status if json_data.key?( 'NeutronError' )
+                        raise APIError, message: json_data['badRequest']['message'], http_code: res.status if json_data.key?( 'badRequest' )
+                        raise APIError, message: "Failed to create loadbalancer pool (name: #{name}, subnet_id: #{subnet_id}, lb_method: #{lb_method}).", http_code: res.status
+                    end
+                    JSON.parse( res.body )
                 end
-        
-                json_data = JSON.parse( res.body )
                 return nil unless json_data.key?( 'pool' )
 
                 Types::Network::PoolItem.new( json_data['pool'] )
@@ -579,22 +449,16 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-change_balancer_type.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=update-pool-detail#update-pool
             def update_lb_pool( pool_id, **options )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    pool: {
-                        lb_method: lb_method,
-                        name: name
-                    }
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.put( "#{@endpoint}/lb/pools/#{pool_id}", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to update loadbalancer pool (pool_id: #{pool_id}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_put(
+                    "/lb/pools/#{pool_id}",
+                    body: {
+                        pool: {
+                            lb_method: lb_method,
+                            name: name
+                        }
+                    },
+                    error_message: "Failed to update loadbalancer pool (pool_id: #{pool_id}, options: #{options})."
+                )
                 return nil unless json_data.key?( 'pool' )
 
                 Types::Network::PoolItem.new( json_data['pool'] )
@@ -610,16 +474,12 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-delete_pool.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=remove-pool-detail#remove-pool
             def delete_lb_pool( pool_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/lb/pools/#{pool_id}", header: headers )
-                raise APIError, message: "Failed to delete loadbalancer pool (pool_id: #{pool_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                subnet_id
+                api_delete(
+                    "/lb/pools/#{pool_id}",
+                    error_message: "Failed to delete loadbalancer pool (pool_id: #{pool_id})."
+                ) do | res |
+                    pool_id
+                end
             end
 
             # Gets a loadbalancer vip list.
@@ -630,16 +490,7 @@ module Nocoah
             # @see get_lb_vip_item
             # @see https://www.conoha.jp/docs/neutron-get_vips_list.html
             def get_lb_vip_list
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/lb/vips" , header: headers )
-                raise APIError, message: "Failed to get loadbalancer vip list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/lb/vips", error_message: "Failed to get loadbalancer vip list." )
                 return [] unless json_data.key?( 'vips' )
 
                 json_data['vips'].map do | vip |
@@ -657,16 +508,10 @@ module Nocoah
             # @see get_lb_vip_list
             # @see https://www.conoha.jp/docs/neutron-get_vips_detail_specified.html
             def get_lb_vip_item( vip_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/lb/vips/#{vip_id}", header: headers )
-                raise APIError, message: "Failed to get loadbalancer vip item (vip_id: #{vip_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/lb/vips/#{vip_id}",
+                    error_message: "Failed to get loadbalancer vip item (vip_id: #{vip_id})."
+                )
                 return nil unless json_data.key?( 'vip' )
 
                 Types::Network::VIPItem.new( json_data['vip'] )
@@ -689,23 +534,19 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/neutron-create_vip.html
             def create_lb_vip( pool_id, subnet_id:, protocol_port:, admin_state_up: true, **options )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
+                options_org = options.dup
                 options[:protocol] = "TCP"
                 options[:admin_state_up] = admin_state_up
                 options[:subnet_id] = subnet_id
                 options[:pool_id] = pool_id
-                body = {
-                    pool: options
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/lb/pools", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to create loadbalancer vip (subnet_id: #{subnet_id}, pool_id: #{pool_id}, protocol_port: #{protocol_port}, admin_state_up: #{admin_state_up}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
         
-                json_data = JSON.parse( res.body )
+                json_data = api_post(
+                    "/lb/pools",
+                    body: {
+                        pool: options
+                    },
+                    error_message: "Failed to create loadbalancer vip (subnet_id: #{subnet_id}, pool_id: #{pool_id}, protocol_port: #{protocol_port}, admin_state_up: #{admin_state_up}, options: #{options_org})."
+                )
                 return nil unless json_data.key?( 'vip' )
 
                 Types::Network::VIPItem.new( json_data['vip'] )
@@ -720,16 +561,12 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/neutron-remove_vip.html
             def delete_lb_vip( vip_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.delete( "#{@endpoint}/lb/vips/#{vip_id}", header: headers )
-                raise APIError, message: "Failed to delete loadbalancer vip (vip_id: #{vip_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                subnet_id
+                api_delete(
+                    "/lb/vips/#{vip_id}",
+                    error_message: "Failed to delete loadbalancer vip (vip_id: #{vip_id})."
+                ) do | res |
+                    vip_id
+                end
             end
 
             # Gets a loadbalancer member list.
@@ -743,16 +580,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-get_members_list.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=list-pool-members-detail#list-pool-members
             def get_lb_member_list( pool_id = nil )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/lb/members" , header: headers )
-                raise APIError, message: "Failed to get loadbalancer member list.", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get( "/lb/members", error_message: "Failed to get loadbalancer member list." )
                 return [] unless json_data.key?( 'members' )
 
                 json_data['members'].select! do | member |
@@ -774,16 +602,10 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-get_members_detail_specified.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=show-pool-member-details-detail#show-pool-member-details
             def get_lb_member_item( member_id )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.get( "#{@endpoint}/lb/members/#{member_id}", header: headers )
-                raise APIError, message: "Failed to get loadbalancer member item (member_id: #{member_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_get(
+                    "/lb/members/#{member_id}",
+                    error_message: "Failed to get loadbalancer member item (member_id: #{member_id})."
+                )
                 return nil unless json_data.key?( 'member' )
 
                 Types::Network::MemberItem.new( json_data['member'] )
@@ -802,24 +624,18 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-add_member.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=add-member-to-pool-detail#add-member-to-pool
             def create_lb_member( pool_id, address:, protocol_port:, weight: 1 )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    member: {
-                        pool_id: pool_id,
-                        address: address,
-                        protocol_port: protocol_port,
-                        weight: weight
-                    }
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.post( "#{@endpoint}/lb/members", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to create loadbalancer member (pool_id: #{pool_id}, address: #{address}, protocol_port: #{protocol_port}, weight: #{weight}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_post(
+                    "/lb/members",
+                    body: {
+                        member: {
+                            pool_id: pool_id,
+                            address: address,
+                            protocol_port: protocol_port,
+                            weight: weight
+                        }
+                    },
+                    error_message: "Failed to create loadbalancer member (pool_id: #{pool_id}, address: #{address}, protocol_port: #{protocol_port}, weight: #{weight})."
+                )
                 return nil unless json_data.key?( 'member' )
 
                 Types::Network::MemberItem.new( json_data['member'] )
@@ -838,19 +654,13 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-update_member.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=add-member-to-pool-detail#add-member-to-pool
             def update_lb_member( member_id, **options )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-                body = {
-                    member: options
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.put( "#{@endpoint}/lb/members/#{member_id}", header: headers, body: body.to_json )
-                raise APIError, message: "Failed to update loadbalancer member (member_id: #{member_id}, options: #{options}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                json_data = JSON.parse( res.body )
+                json_data = api_put(
+                    "/lb/members/#{member_id}",
+                    body: {
+                        member: options
+                    },
+                    error_message: "Failed to update loadbalancer member (member_id: #{member_id}, options: #{options})."
+                )
                 return nil unless json_data.key?( 'member' )
 
                 Types::Network::MemberItem.new( json_data['member'] )
@@ -866,16 +676,12 @@ module Nocoah
             # @see https://www.conoha.jp/docs/neutron-remove_member.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=add-member-to-pool-detail#add-member-to-pool
             def delete_lb_member( member_id, **options )
-                headers = {
-                    Accept: "application/json",
-                    'X-Auth-Token': @identity.api_token
-                }
-
-                http_client = HTTPClient.new;
-                res = http_client.put( "#{@endpoint}/lb/members/#{member_id}", header: headers )
-                raise APIError, message: "Failed to delete loadbalancer member (member_id: #{member_id}).", http_code: res.status if res.status >= HTTP::Status::BAD_REQUEST
-        
-                member_id
+                api_delete(
+                    "/lb/members/#{member_id}",
+                    error_message: "Failed to delete loadbalancer member (member_id: #{member_id})."
+                ) do | res |
+                    member_id
+                end
             end
 
         end
