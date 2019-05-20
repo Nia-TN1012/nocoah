@@ -761,7 +761,7 @@ module Nocoah
         
                 json_data = api_post( 
                     "/#{@identity.config.tenant_id}/os-keypairs",
-                    body: body
+                    body: body,
                     error_message: "Failed to add key-pair (keypair_name: #{keypair_name}, public_key: #{public_key}, public_key_path: #{public_key_path})."
                 )
                 return nil unless json_data.key?( 'keypair' )
@@ -1016,7 +1016,7 @@ module Nocoah
                     body: {
                         metadata: metadata
                     },
-                    "Failed to set metadata (server_id: #{server_id}, metadata: #{metadata})."
+                    error_message: "Failed to set metadata (server_id: #{server_id}, metadata: #{metadata})."
                 )
                 json_data['metadata']
             end
