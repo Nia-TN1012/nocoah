@@ -16,9 +16,9 @@ module Nocoah
                 attr_reader :pool_id
                 # @return [String] Pool name
                 attr_reader :name
-                # @return [String] Status
+                # @return [String (Nocoah::Types::Network::Status)] Status
                 attr_reader :status
-                # @return [String] Loadbalancer method
+                # @return [String (Nocoah::Types::Network::LoadbalancerAlgorithm)] Loadbalancer method
                 attr_reader :lb_method
                 # @return [String] Protocol
                 attr_reader :protocol
@@ -61,6 +61,14 @@ module Nocoah
                     @provider = data['provider']
                 end
 
+            end
+
+            # Loadbalancing algorithm
+            module LoadbalancerAlgorithm
+                # Round robbin: Transfers requests evenly to the server.
+                ROUND_ROBIN = "ROUND_ROBIN"
+                # Least connections: Transfers requests to the server with the smallest number of current connections.
+                LEAST_CONNECTIONS = "LEAST_CONNECTIONS"
             end
 
         end

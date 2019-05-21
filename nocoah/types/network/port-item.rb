@@ -17,7 +17,7 @@ module Nocoah
                 attr_reader :port_id
                 # @return [String] Port name
                 attr_reader :name
-                # @return [String] Status
+                # @return [String (Nocoah::Types::Network::Status)] Status
                 attr_reader :status
                 # @return [Array<Nocoah::Types::Network::FixedIPAddress>] Fixed IP addresses with subnet IDs
                 attr_reader :fixed_ips

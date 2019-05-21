@@ -401,9 +401,9 @@ module Nocoah
 
             # Creates a new loadbalancer pool and assigns to the subnet.
             #
-            # @param [String]   name         Pool name
-            # @param [String]   subnet_id    Assigned subnet ID
-            # @param [String]   lb_method    Loadbalancer method ( 'ROUND_ROBIN' or 'LEAST_CONNECTIONS' )
+            # @param [String]                                                   name            Pool name
+            # @param [String]                                                   subnet_id       Assigned subnet ID
+            # @param [String (Nocoah::Types::Network::LoadbalancerAlgorithm)]   lb_method       Loadbalancer method ( 'ROUND_ROBIN' or 'LEAST_CONNECTIONS' )
             #
             # @return [Nocoah::Types::Network::PoolItem]        When succeeded, created loadbalancer pool item.
             # @raise [Nocoah::APIError]                         When failed.
@@ -618,7 +618,7 @@ module Nocoah
             # @param [Integer]   protocol_port          Port number ( 0..65535 )
             # @param [Integer]   weight                 Weight ( 0..256 ) ( When 0, disabled balancing. )
             #
-            # @return [Nocoah::Types::Network::VipItem]         When succeeded, created loadbalancer member item.
+            # @return [Nocoah::Types::Network::MemberItem]      When succeeded, created loadbalancer member item.
             # @raise [Nocoah::APIError]                         When failed.
             #
             # @see https://www.conoha.jp/docs/neutron-add_member.html
@@ -648,7 +648,7 @@ module Nocoah
             # @option options   [Integer]   :weight         Weight ( 0..256 ) ( When 0, disabled balancing. )
             # @option options   [String]    :pool_id        Port ID ( When changing pool of the connection destination )
             #
-            # @return [Nocoah::Types::Network::VipItem]         When succeeded, created loadbalancer member item.
+            # @return [Nocoah::Types::Network::MemberItem]      When succeeded, created loadbalancer member item.
             # @raise [Nocoah::APIError]                         When failed.
             #
             # @see https://www.conoha.jp/docs/neutron-update_member.html
@@ -670,17 +670,367 @@ module Nocoah
             #
             # @param [String] member_id     Member ID to delete
             #
-            # @return [String]              When succeeded, deleted loadbalancer member item.
+            # @return [String]              When succeeded, deleted loadbalancer member ID.
             # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/neutron-remove_member.html
-            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=add-member-to-pool-detail#add-member-to-pool
-            def delete_lb_member( member_id, **options )
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=remove-member-from-pool-detail#remove-member-from-pool
+            def delete_lb_member( member_id )
                 api_delete(
                     "/lb/members/#{member_id}",
                     error_message: "Failed to delete loadbalancer member (member_id: #{member_id})."
                 ) do | res |
                     member_id
+                end
+            end
+
+            # Gets a loadbalancer health monitor list.
+            #
+            # @return [Array<Nocoah::Types::Network::HealthMonitorItem>]        When succeeded, loadbalancer health monitor list.
+            # @raise [Nocoah::APIError]                                         When failed.
+            #
+            # @see get_lb_health_monitor_item
+            # @see https://www.conoha.jp/docs/neutron-get_healthmonitors_list.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=list-health-monitors-detail#list-health-monitors
+            def get_lb_health_monitor_list
+                json_data = api_get( "/lb/health_monitors", error_message: "Failed to get loadbalancer health monitor list." )
+                return [] unless json_data.key?( 'health_monitors' )
+
+                json_data['health_monitors'].map do | health_monitor |
+                    Types::Network::HealthMonitorItem.new( health_monitor )
+                end
+            end
+
+            # Gets a loadbalancer health monitor item.
+            #
+            # @param [String]   health_monitor_id       Health monitor ID
+            #
+            # @return [Nocoah::Types::Network::HealthMonitorItem]       When succeeded, loadbalancer health monitor item.
+            # @raise [Nocoah::APIError]                                 When failed.
+            #
+            # @see get_lb_health_monitor_list
+            # @see https://www.conoha.jp/docs/neutron-get_healthmonitors_detail_specified.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=show-health-monitor-details-detail#show-health-monitor-details
+            def get_lb_health_monitor_item( health_monitor_id )
+                json_data = api_get(
+                    "/lb/health_monitors/#{health_monitor_id}",
+                    error_message: "Failed to get loadbalancer health monitor item (health_monitor_id: #{health_monitor_id})."
+                )
+                return nil unless json_data.key?( 'health_monitor' )
+
+                Types::Network::HealthMonitorItem.new( json_data['health_monitor'] )
+            end
+
+            # Creates a new loadbalancer health monitor.
+            #
+            # @param          [String (Nocoah::Types::Network::HealthMonitorType)]      type                Health monitor type ( 'PING', 'TCP' or 'HTTP' )
+            # @param          [Integer]                                                 delay               Health check interval (ConoHa: 5..10)
+            # @param          [Hash]                                                    options             Options
+            # @option options [String]                                                  :url_path           URL path
+            # @option options [String]                                                  :expected_codes     Expected HTTP code
+            #
+            # @return [Nocoah::Types::Network::HealthMonitorItem]       When succeeded, created loadbalancer health monitor item.
+            # @raise [Nocoah::APIError]                                 When failed.
+            #
+            # @see https://www.conoha.jp/docs/neutron-create_health_monitor.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=create-health-monitor-detail#create-health-monitor
+            def create_lb_health_monitor( type, delay: 5, **options )
+                options_org = options.dup
+                options[:type] = type
+                options[:delay] = delay
+                json_data = api_post(
+                    "/lb/health_monitors",
+                    body: {
+                        health_monitor: options
+                    },
+                    error_message: "Failed to create loadbalancer health monitor (type: #{type}, delay: #{delay}, options: #{options_org})."
+                )
+                return nil unless json_data.key?( 'health_monitor' )
+
+                Types::Network::HealthMonitorItem.new( json_data['health_monitor'] )
+            end
+
+            # Updates the loadbalancer health monitor.
+            #
+            # @param          [String]    health_monitor_id         Health monitor ID
+            # @param          [Hash]      options                   Options
+            # @option options [Integer]   :delay                    Health check interval (ConoHa: 5..10)
+            # @option options [String]    :url_path                 URL path
+            #
+            # @return [Nocoah::Types::Network::HealthMonitorItem]       When succeeded, updated loadbalancer health monitor item.
+            # @raise [Nocoah::APIError]                                 When failed.
+            #
+            # @see https://www.conoha.jp/docs/neutron-change_health_monitor.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=update-health-monitor-detail#update-health-monitor
+            def update_lb_health_monitor( health_monitor_id, **options )
+                json_data = api_put(
+                    "/lb/health_monitors/#{health_monitor_id}",
+                    body: {
+                        health_monitor: options
+                    },
+                    error_message: "Failed to update loadbalancer health monitor (health_monitor_id: #{health_monitor_id}, options: #{options})."
+                )
+                return nil unless json_data.key?( 'health_monitor' )
+
+                Types::Network::HealthMonitorItem.new( json_data['health_monitor'] )
+            end
+
+            # Deletes the loadbalancer health monitor.
+            #
+            # @param [String] health_monitor_id         Health monitor ID to delete
+            #
+            # @return [String]              When succeeded, deleted loadbalancer health monitor ID.
+            # @raise [Nocoah::APIError]     When failed.
+            #
+            # @see https://www.conoha.jp/docs/neutron-delete_health_monitor.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=remove-health-monitor-detail#remove-health-monitor
+            def delete_lb_health_monitor( health_monitor_id )
+                api_delete(
+                    "/lb/health_monitors/#{health_monitor_id}",
+                    error_message: "Failed to delete loadbalancer health monitor (health_monitor_id: #{health_monitor_id})."
+                ) do | res |
+                    health_monitor_id
+                end
+            end
+
+            # Associates the loadbalancer health monitor to the pool.
+            #
+            # @param [String] pool_id               Pool ID
+            # @param [String] health_monitor_id     Health monitor ID
+            #
+            # @return [String]              When succeeded, associated loadbalancer health monitor ID.
+            # @raise [Nocoah::APIError]     When failed.
+            #
+            # @see https://www.conoha.jp/docs/neutron-set_health_monitor_on_pool.html
+            def associate_lb_health_monitor( pool_id, health_monitor_id: )
+                json_data = api_post(
+                    "/lb/pools/#{pool_id}/health_monitors",
+                    body: {
+                        health_monitor: {
+                            id: health_monitor_id
+                        }
+                    },
+                    error_message: "Failed to associate loadbalancer health monitor to pool (pool_id: #{pool_id}, health_monitor_id: #{health_monitor_id})."
+                ) do | res |
+                    health_monitor_id
+                end
+            end
+
+            # Disassociates the loadbalancer health monitor from the pool.
+            #
+            # @param [String] pool_id               Pool ID
+            # @param [String] health_monitor_id     Health monitor ID
+            #
+            # @return [String]              When succeeded, disassociated loadbalancer health monitor ID.
+            # @raise [Nocoah::APIError]     When failed.
+            #
+            # @see https://www.conoha.jp/docs/neutron-deallocate_health_monitor.html
+            def disassociate_lb_health_monitor( pool_id, health_monitor_id: )
+                json_data = api_delete(
+                    "/lb/pools/#{pool_id}/health_monitors/#{health_monitor_id}",
+                    error_message: "Failed to disassociate loadbalancer health monitor from pool (pool_id: #{pool_id}, health_monitor_id: #{health_monitor_id})."
+                ) do | res |
+                    health_monitor_id
+                end
+            end
+
+            # Gets a security group list.
+            #
+            # @return [Array<Nocoah::Types::Network::SecurityGroupItem>]        When succeeded, security group list.
+            # @raise [Nocoah::APIError]                                         When failed.
+            #
+            # @see get_security_group_item
+            # @see https://www.conoha.jp/docs/neutron-get_secgroups_list.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=list-security-groups-detail#list-security-groups
+            def get_security_group_list
+                json_data = api_get( "/security-groups", error_message: "Failed to get security group list." )
+                return [] unless json_data.key?( 'security_groups' )
+
+                json_data['security_groups'].map do | sg |
+                    Types::Network::SecurityGroupItem.new( sg )
+                end
+            end
+
+            # Gets a security group item.
+            #
+            # @param [String]   security_group_id       Security group ID
+            #
+            # @return [Nocoah::Types::Network::SecurityGroupItem]       When succeeded, security group item.
+            # @raise [Nocoah::APIError]                                 When failed.
+            #
+            # @see get_security_group_list
+            # @see https://www.conoha.jp/docs/neutron-get_secgroups_detail_specified.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=show-security-group-detail#show-security-group
+            def get_security_group_item( security_group_id )
+                json_data = api_get(
+                    "/security-groups/#{security_group_id}",
+                    error_message: "Failed to get security group item (security_group_id: #{security_group_id})."
+                )
+                return nil unless json_data.key?( 'security_group' )
+
+                Types::Network::SecurityGroupItem.new( json_data['security_group'] )
+            end
+
+            # Creates a new secrity group.
+            #
+            # @param [String]   name                Security group name
+            # @param [String]   description         Description
+            #
+            # @return [Nocoah::Types::Network::SecurityGroupItem]       When succeeded, created security group item.
+            # @raise [Nocoah::APIError]                                 When failed.
+            #
+            # @see https://www.conoha.jp/docs/neutron-create_secgroup.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=create-security-group-detail#create-security-group
+            def create_security_group( name, description: "" )
+                json_data = api_post(
+                    "/security-groups",
+                    body: {
+                        security_group: {
+                            name: name,
+                            description: description
+                        }
+                    },
+                    error_message: "Failed to create security group (name: #{name}, description: #{description})."
+                )
+                return nil unless json_data.key?( 'security_group' )
+
+                Types::Network::SecurityGroupItem.new( json_data['security_group'] )
+            end
+
+            # Updates the secrity group.
+            #
+            # @param          [String]      security_group_id           Security group ID
+            # @param          [Hash]        options                     Options
+            # @option options [String]      :name                       Security group name
+            # @option options [String]      :description                Description
+            #
+            # @return [Nocoah::Types::Network::SecurityGroupItem]       When succeeded, updated security group item.
+            # @raise [Nocoah::APIError]                                 When failed.
+            #
+            # @see https://www.conoha.jp/docs/neutron-update_secgroup.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=update-security-group-detail#update-security-group
+            def update_security_group( security_group_id, **options )
+                json_data = api_put(
+                    "/security-groups/#{security_group_id}",
+                    body: {
+                        security_group: options
+                    },
+                    error_message: "Failed to update security group (security_group_id: #{security_group_id}, options: #{options})."
+                )
+                return nil unless json_data.key?( 'security_group' )
+
+                Types::Network::SecurityGroupItem.new( json_data['security_group'] )
+            end
+
+            # Deletes the secrity group.
+            #
+            # @param [String] security_group_id         Security group ID to delete
+            #
+            # @return [String]              When succeeded, deleted secrity group ID.
+            # @raise [Nocoah::APIError]     When failed.
+            #
+            # @see https://www.conoha.jp/docs/neutron-delete_secgroup.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=delete-security-group-detail#delete-security-group
+            def delete_security_group( security_group_id )
+                api_delete(
+                    "/security-groups/#{security_group_id}",
+                    error_message: "Failed to delete secrity group (security_group_id: #{security_group_id})."
+                ) do | res |
+                    security_group_id
+                end
+            end
+
+            # Gets a security group rule list.
+            #
+            # @param [String] security_group_id         Security group ID ( When nil, gets all security group rule list )
+            #
+            # @return [Array<Nocoah::Types::Network::SecurityGroupRule>]        When succeeded, security group rule list.
+            # @raise [Nocoah::APIError]                                         When failed.
+            #
+            # @see get_security_group_rule_item
+            # @see https://www.conoha.jp/docs/neutron-get_rules_on_secgroup.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=list-security-group-rules-detail#list-security-group-rules
+            def get_security_group_rule_list( security_group_id = nil )
+                json_data = api_get( "/security-group-rules", error_message: "Failed to get security group rule list." )
+                return [] unless json_data.key?( 'security_group_rules' )
+
+                json_data['security_group_rules'].select! do | rule |
+                    rule['security_group_id'] == security_group_id
+                end if !security_group_id.nil?
+                json_data['security_group_rules'].map do | rule |
+                    Types::Network::SecurityGroupRule.new( rule )
+                end
+            end
+
+            # Gets a security group rule item.
+            #
+            # @param [String]   security_group_rule_id      Security group rule ID
+            #
+            # @return [Nocoah::Types::Network::SecurityGroupRule]       When succeeded, security group rule item.
+            # @raise [Nocoah::APIError]                                 When failed.
+            #
+            # @see get_security_group_rule_list
+            # @see https://www.conoha.jp/docs/neutron-get_rules_detail_specified.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=show-security-group-rule-detail#show-security-group-rule
+            def get_security_group_rule_item( security_group_rule_id )
+                json_data = api_get(
+                    "/security-group-rules/#{security_group_rule_id}",
+                    error_message: "Failed to get security group rule item (security_group_rule_id: #{security_group_rule_id})."
+                )
+                return nil unless json_data.key?( 'security_group_rule' )
+
+                Types::Network::SecurityGroupItem.new( json_data['security_group_rule'] )
+            end
+
+            # Creates a new secrity group rule.
+            #
+            # @param          [String]                                                          security_group_id           Security group ID
+            # @param          [String (Nocoah::Types::Network::SecurityGroupRuleDirection)]     direction                   Direction
+            # @param          [String (Nocoah::Types::Network::SecurityGroupRuleEtherType)]     ethertype                   Ether type
+            # @param          [Hash]                                                            options                     Options
+            # @option options [Integer]                                                         :port_range_min             Minimum port range
+            # @option options [Integer]                                                         :port_range_max             Maximum port range
+            # @option options [String (Nocoah::Types::Network::SecurityGroupRuleProtocol)]      :protocol                   Protocol
+            # @option options [String]                                                          :remote_group_id            Remote group ID
+            # @option options [String]                                                          :remote_ip_prefix           
+            #
+            # @return [Nocoah::Types::Network::SecurityGroupRule]       When succeeded, created security group rule item.
+            # @raise [Nocoah::APIError]                                 When failed.
+            #
+            # @see https://www.conoha.jp/docs/neutron-create_rule_on_secgroup.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=create-security-group-rule-detail#create-security-group-rule
+            def create_security_group_rule( security_group_id, direction:, ethertype:, **options )
+                sg_rule_param = options.dup
+                sg_rule_param[:security_group_id] = security_group_id
+                sg_rule_param[:direction] = direction
+                sg_rule_param[:ethertype] = ethertype
+                json_data = api_post(
+                    "/security-group-rules",
+                    body: {
+                        security_group_rule: sg_rule_param
+                    },
+                    error_message: "Failed to create security group rule (security_group_id: #{security_group_id}, direction: #{direction}, ethertype: #{ethertype}, options: #{options})."
+                )
+                return nil unless json_data.key?( 'security_group_rule' )
+
+                Types::Network::SecurityGroupRule.new( json_data['security_group_rule'] )
+            end
+
+            # Deletes the secrity group rule.
+            #
+            # @param [String] security_group_rule_id         Security group rule ID to delete
+            #
+            # @return [String]              When succeeded, deleted secrity group rule ID.
+            # @raise [Nocoah::APIError]     When failed.
+            #
+            # @see https://www.conoha.jp/docs/neutron-delete_rule_on_secgroup.html
+            # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=delete-security-group-rule-detail#delete-security-group-rule
+            def delete_security_group_rule( security_group_rule_id )
+                api_delete(
+                    "/security-group-rules/#{security_group_rule_id}",
+                    error_message: "Failed to delete secrity group rule (security_group_rule_id: #{security_group_rule_id})."
+                ) do | res |
+                    security_group_rule_id
                 end
             end
 

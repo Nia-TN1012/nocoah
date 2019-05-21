@@ -17,7 +17,7 @@ module Nocoah
                 attr_reader :network_id
                 # @return [String] Network name
                 attr_reader :name
-                # @return [String] Status
+                # @return [String (Nocoah::Types::Network::Status)] Status
                 attr_reader :status
                 # @return [Array<String>] Subnet IDs
                 attr_reader :subnets

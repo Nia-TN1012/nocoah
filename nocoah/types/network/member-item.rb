@@ -14,7 +14,7 @@ module Nocoah
 
                 # @return [String] Member ID
                 attr_reader :member_id
-                # @return [String] Status
+                # @return [String (Nocoah::Types::Network::Status)] Status
                 attr_reader :status
                 # @return [String] Status description
                 attr_reader :status_description

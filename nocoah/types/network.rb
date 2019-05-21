@@ -11,6 +11,18 @@ module Nocoah
         # Network
         module Network
 
+            # Status
+            module Status
+                # @return [String] Active
+                ACTIVE = "ACTIVE"
+                # @return [String] Down
+                DOWN = "DOWN"
+                # @return [String] Build
+                BUILD = "BUILD"
+                # @return [String] Error
+                ERROR = "ERROR"
+            end
+            
         end
 
     end
