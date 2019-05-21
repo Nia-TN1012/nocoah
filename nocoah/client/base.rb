@@ -167,6 +167,34 @@ module Nocoah
                 end
             end
 
+            # Calls API with GET method and downloads content.
+            #
+            # @param [String]   api_path                API url path ( from endpoint )
+            # @param [Hash]     opt_header              Optional request header
+            # @param [String]   error_message           Error message when api failed
+            # @param [Boolean]  raise_api_failed        If true, raises {Nocoah::APIError} when api failed
+            # @param [Proc]     get_content_callback    Callback ( Object (Chunked message-body) ) => Object
+            #
+            # @return [true]                When succeeded.
+            # @raise [Nocoah::APIError]     When api failed.
+            def api_get_content( api_path, opt_header: {}, error_message: nil, raise_api_failed: true, &get_content_callback )
+                headers = {
+                    Accept: "application/json",
+                    'X-Auth-Token': @identity.api_token
+                }.merge!( opt_header )
+                error_message ||= "API GET Failed."
+
+                begin
+                    @@http_client.get_content( "#{@endpoint}#{api_path}", header: headers ) do | chunk |
+                        get_content_callback.call( chunk ) if block_given?
+                    end
+                rescue StandardError => e
+                    raise APIError, message: "#{error_message} (cause: #{e.message})" if raise_api_failed
+                end
+
+                nil
+            end
+
         end
 
     end

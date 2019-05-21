@@ -14,12 +14,17 @@ module Nocoah
 
             # Power state
             module PowerState
-
+                # No state
                 NOSTATE = 0
+                # Running
                 RUNNING = 1
+                # Paused
                 PAUSED = 3
+                # Shutdown
                 SHUTDOWN = 4
+                # Crashed
                 CRASHED = 6
+                # Suspended
                 SUSPENDED = 7
 
             end
