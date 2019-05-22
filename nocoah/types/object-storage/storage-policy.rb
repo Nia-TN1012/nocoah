@@ -23,7 +23,7 @@ module Nocoah
 
                 # Creates a new {StoragePolicy} class instance.
                 #
-                # @param [String]   data        Policy name
+                # @param [String]   name        Policy name
                 # @param [Hash]     data        Data
                 def initialize( name, data )
                     @policy_name = name

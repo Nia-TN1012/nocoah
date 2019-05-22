@@ -241,18 +241,18 @@ module Nocoah
             #
             # @param [String]    container_name          Container name
             # @param [String]    object_name             Object name
-            # @param [String]    dest_file_path          Output file path
+            # @param [String]    output_file_path        Output file path
             #
             # @return [Nocoah::Types::ObjectStorage::ObjectInfo]    When succeeded, object info.
             # @raise [Nocoah::APIError]                             When failed.
             #
             # @see https://www.conoha.jp/docs/swift-object_download.html
             # @see https://developer.openstack.org/api-ref/object-store/?expanded=get-object-content-and-metadata-detail#get-object-content-and-metadata
-            def download_object( container_name, object_name, dest_file_path: )
-                File.open( dest_file_path, "wb" ) do | file |
+            def download_object( container_name, object_name, output_file_path: )
+                File.open( output_file_path, "wb" ) do | file |
                     api_get_content(
                         "/nc_#{@identity.config.tenant_id}/#{container_name}/#{object_name}",
-                        error_message: "Failed to download object (container_name: #{container_name}, object_name: #{object_name}, dest_file_path: #{dest_file_path})."
+                        error_message: "Failed to download object (container_name: #{container_name}, object_name: #{object_name}, output_file_path: #{output_file_path})."
                     ) do | chunk |
                         file.write( chunk )
                     end
@@ -271,7 +271,7 @@ module Nocoah
             #
             # @see https://www.conoha.jp/docs/swift-delete_object.html
             # @see https://developer.openstack.org/api-ref/object-store/?expanded=get-object-content-and-metadata-detail,delete-object-detail#delete-object
-            def copy_object( container_name, object_name )
+            def delete_object( container_name, object_name )
                 api_delete(
                     "/nc_#{@identity.config.tenant_id}/#{container_name}/#{object_name}",
                     opt_header: {
