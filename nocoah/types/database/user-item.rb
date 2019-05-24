@@ -1,4 +1,4 @@
-require_relative '../grant-database'
+require_relative './grant-database'
 
 # Nocoah
 module Nocoah
