@@ -274,9 +274,6 @@ module Nocoah
             def delete_object( container_name, object_name )
                 api_delete(
                     "/nc_#{@identity.config.tenant_id}/#{container_name}/#{object_name}",
-                    opt_header: {
-                        Destination: dest_object_path
-                    },
                     error_message: "Failed to delete object (container_name: #{container_name}, object_name: #{object_name})."
                 ) do | res |
                     object_name
