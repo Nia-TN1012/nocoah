@@ -21,6 +21,14 @@ module Nocoah
                 MIN = "min"
             end
 
+            # Sort direction
+            module SortDirection
+                # Ascending
+                ASC = "asc"
+                # Descending
+                DESC = "desc"
+            end
+
         end
 
     end

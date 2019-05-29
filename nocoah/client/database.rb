@@ -131,7 +131,7 @@ module Nocoah
                     },
                     error_message: "Failed to update service metadata (service_id: #{service_id}, metadata: #{metadata})."
                     )
-                return nil unless json_data.key?( 'service' )
+                json_data['metadata']
             end
 
             # Deletes the service.
@@ -209,18 +209,17 @@ module Nocoah
                 else
                     backup = enabled
                 end
-                json_data = api_get(
-                    "/services/#{service_id}/quotas",
+                api_put(
+                    "/services/#{service_id}/action",
                     body: {
                         backup: {
                             status: backup
                         }
                     },
-                    error_message: "Failed to set service quota (service_id: #{service_id})."
-                )
-                return nil unless json_data.key?( 'quota' )
-
-                json_data['quota']
+                    error_message: "Failed to set database backup (service_id: #{service_id}, enabled: #{enabled})."
+                ) do | res |
+                    service_id
+                end
             end
 
             # Gets a database list.
@@ -272,7 +271,7 @@ module Nocoah
             # @option [String] memo             Memo
             #
             # @example
-            #   create_db_user(
+            #   create_database(
             #       "9d6441f6-c5a0-4dcf-a1a9-1a4d724e51fd",
             #       db_name: "dbname01",
             #       memo: "memo"
