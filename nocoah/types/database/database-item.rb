@@ -55,12 +55,22 @@ module Nocoah
 
             end
 
+            # Sort key of Database
+            module SortKeyDatabase
+                # Sort by Created date
+                CREATE_DATE = "create_date"
+                # Sort by Database name
+                DB_NAME = "db_name"
+                # Sort by Status
+                STATUS = "status"
+                # Sort by Memo
+                MEMO = "memo"
+            end
+
             # Database type
             module DatabaseType
                 # MySQL
                 MYSQL = "mysql"
-                # Maria DB
-                MARIADB = MYSQL
             end
 
             # Database charcter set

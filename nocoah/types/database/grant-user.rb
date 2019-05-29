@@ -26,6 +26,14 @@ module Nocoah
                 end
 
             end
+
+            # Sort key of Grant user
+            module SortKeyGrantUser
+                # Sort by Created date
+                CREATE_DATE = "create_date"
+                # Sort by Status
+                STATUS = "status"
+            end
             
         end
 

@@ -25,7 +25,7 @@ module Nocoah
             # @option url_query [Integer]   :offset         Offset
             # @option url_query [Integer]   :limit          Number of item
             # @option url_query [String]    :sort_key       ("create_date") Sort key ( It can also be specified from the constant list of {Types::Mail::SortKeyService}. )
-            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Mail::SpamFilterType}. )
+            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Common::SortDirection}. )
             #
             # @return [Array<Nocoah::Types::Mail::ServiceItem>]     When succeeded, service list.
             # @raise [Nocoah::APIError]                             When failed.
@@ -231,7 +231,7 @@ module Nocoah
             # @option url_query [Integer]   :offset         Offset
             # @option url_query [Integer]   :limit          Number of item
             # @option url_query [String]    :sort_key       ("create_date") Sort key ( It can also be specified from the constant list of {Types::Mail::SortKeyDomain}. )
-            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Mail::SpamFilterType}. )
+            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Common::SortDirection}. )
             #
             # @return [Array<Nocoah::Types::Mail::DomainItem>]      When succeeded, domain list.
             # @raise [Nocoah::APIError]                             When failed.
@@ -373,7 +373,7 @@ module Nocoah
             # @option url_query [Integer]   :offset         (0) Offset
             # @option url_query [Integer]   :limit          (1000 Number of item
             # @option url_query [String]    :sort_key       ("create_date") Sort key ( It can also be specified from the constant list of {Types::Mail::SortKeyEmail}. )
-            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Mail::SpamFilterType}. )
+            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Common::SortDirection}. )
             #
             # @return [Array<Nocoah::Types::Mail::EmailItem>]       When succeeded, email account list.
             # @raise [Nocoah::APIError]                             When failed.

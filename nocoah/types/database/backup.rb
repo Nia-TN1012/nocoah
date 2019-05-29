@@ -30,6 +30,14 @@ module Nocoah
                 end
 
             end
+
+            # Sort key of Backup
+            module SortKeyBackup
+                # Sort by Created date
+                CREATE_DATE = "create_date"
+                # Sort by Backup name
+                BACKUP_NAME = "backup_name"
+            end
             
         end
 

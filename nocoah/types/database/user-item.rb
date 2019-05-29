@@ -41,6 +41,20 @@ module Nocoah
                 end
 
             end
+
+            # Sort key of User
+            module SortKeyUser
+                # Sort by Created date
+                CREATE_DATE = "create_date"
+                # Sort by User name
+                USER_NAME = "user_name"
+                # Sort by Status
+                STATUS = "status"
+                # Sort by Memo
+                MEMO = "memo"
+                # Sort by Hostname
+                HOSTNAME = "hostname"
+            end
             
         end
 

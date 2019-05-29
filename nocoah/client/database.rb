@@ -24,8 +24,8 @@ module Nocoah
             # @param            [Hash]      url_query       URL query         
             # @option url_query [Integer]   :offset         Offset
             # @option url_query [Integer]   :limit          Number of item
-            # @option url_query [String]    :sort_key       ("create_date") Sort key
-            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' )
+            # @option url_query [String]    :sort_key       ("create_date") Sort key ( It can also be specified from the constant list of {Types::Database::SortKeyService}. )
+            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Common::SortDirection}. )
             #
             # @return [Array<Nocoah::Types::Database::ServiceItem>]     When succeeded, service list.
             # @raise [Nocoah::APIError]                                 When failed.
@@ -228,8 +228,8 @@ module Nocoah
             # @option url_query [String]    :service_id     Filter by service ID      
             # @option url_query [Integer]   :offset         Offset
             # @option url_query [Integer]   :limit          Number of item
-            # @option url_query [String]    :sort_key       ("create_date") Sort key
-            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' )
+            # @option url_query [String]    :sort_key       ("create_date") Sort key ( It can also be specified from the constant list of {Types::Database::SortKeyDatabase}. )
+            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Common::SortDirection}. )
             #
             # @return [Array<Nocoah::Types::Database::DatabaseItem>]    When succeeded, database list.
             # @raise [Nocoah::APIError]                                 When failed.
@@ -266,8 +266,8 @@ module Nocoah
             #
             # @param  [String] service_id       Service ID
             # @param  [String] db_name          Database name
-            # @option [String] type             Database type
-            # @option [String] charset          Database character set
+            # @option [String] type             Database type ( It can also be specified from the constant list of {Types::Database::DatabaseType}. )
+            # @option [String] charset          Database character set ( It can also be specified from the constant list of {Types::Database::DatabaseCharacterSet}. )
             # @option [String] memo             Memo
             #
             # @example
@@ -342,8 +342,8 @@ module Nocoah
             # @param            [Hash]      url_query       URL query
             # @option url_query [Integer]   :offset         Offset
             # @option url_query [Integer]   :limit          Number of item
-            # @option url_query [String]    :sort_key       ("create_date") Sort key
-            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' )
+            # @option url_query [String]    :sort_key       ("create_date") Sort key ( It can also be specified from the constant list of {Types::Database::SortKeyGrantUser}. )
+            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Common::SortDirection}. )
             #
             # @return [Array<Nocoah::Types::Database::GrantUser>]       When succeeded, database grant list.
             # @raise [Nocoah::APIError]                                 When failed.
@@ -405,8 +405,8 @@ module Nocoah
             # @param            [Hash]      url_query       URL query
             # @option url_query [Integer]   :offset         Offset
             # @option url_query [Integer]   :limit          Number of item
-            # @option url_query [String]    :sort_key       ("create_date") Sort key
-            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' )
+            # @option url_query [String]    :sort_key       ("create_date") Sort key ( It can also be specified from the constant list of {Types::Database::SortKeyBackup}. )
+            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Common::SortDirection}. )
             #
             # @return [Array<Nocoah::Types::Database::Backup>]      When succeeded, database backup list.
             # @raise [Nocoah::APIError]                             When failed.
@@ -451,8 +451,8 @@ module Nocoah
             # @option url_query [String]    :service_id     Filter by service ID      
             # @option url_query [Integer]   :offset         (0) Offset
             # @option url_query [Integer]   :limit          (1000) Number of item
-            # @option url_query [String]    :sort_key       ("create_date") Sort key
-            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' )
+            # @option url_query [String]    :sort_key       ("create_date") Sort key ( It can also be specified from the constant list of {Types::Database::SortKeyUser}. )
+            # @option url_query [String]    :sort_type      ("asc") Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Common::SortDirection}. )
             #
             # @return [Array<Nocoah::Types::Database::UserItem>]        When succeeded, database user list.
             # @raise [Nocoah::APIError]                                 When failed.

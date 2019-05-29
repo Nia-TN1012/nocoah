@@ -48,6 +48,16 @@ module Nocoah
                 end
 
             end
+
+            # Sort key of Service
+            module SortKeyService
+                # Sort by Created date
+                CREATE_DATE = "create_date"
+                # Sort by Service name
+                SERVICE_NAME = "service_name"
+                # Sort by Status
+                STATUS = "status"
+            end
             
         end
 
