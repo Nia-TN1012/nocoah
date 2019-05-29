@@ -34,6 +34,26 @@ module Nocoah
 
             end
 
+            # Sort key of Domain
+            module SortKeyOrderItem
+                # Sort by Service start date
+                SERVICE_START_DATE = "service_start_date"
+                # Sort by Service name
+                SERVICE_NAME = "service_name"
+                # Sort by Item status
+                ITEM_STATUS = "item_status"
+
+                # Validates a key name
+                #
+                # @param [String] key_name      Sort key name
+                #
+                # @return [True]    key_name is valid.
+                # @return [False]   key_name is invalid.
+                def self.validate_key( key_name )
+                    key_name == SERVICE_START_DATE || key_name == SERVICE_NAME || key_name == ITEM_STATUS
+                end
+            end
+
         end
     
     end

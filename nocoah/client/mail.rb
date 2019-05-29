@@ -909,7 +909,7 @@ module Nocoah
             #
             # return [String]       "enable" : When enabled is "enable" or true / "disable" : Otherwise
             def self.convert_status( enabled )
-                case enabled.class
+                case enabled
                 when TrueClass
                     status = "enable"
                 when FalseClass

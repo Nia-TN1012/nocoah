@@ -201,7 +201,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/paas-database-update-database-quotas.html
             # @see https://www.conoha.jp/vps/pricing/
             def set_database_backup( service_id, enabled: )
-                case enabled.class
+                case enabled
                 when TrueClass
                     backup = "enable"
                 when FalseClass

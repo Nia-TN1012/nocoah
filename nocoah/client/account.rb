@@ -17,20 +17,44 @@ module Nocoah
             # Account API Endpoint ( '%s' contains a string representing the region. (e.q. 'tyo1', 'sin1' or 'sjc1') )
             ENDPOINT_BASE = "https://account.%s.conoha.io/v1"
 
-            # Gets a ordered items list.
+            # Gets a ordered item list.
             #
-            # @return [Array<Nocoah::Types::Account::OrderItem>]    When succeeded, ordered items list.
+            # @param          [Hash]                filters         Filters (  )
+            # @option filters [String or Regexp]    :service_name   Filter by Service name
+            # @option filters [String]              :item_status    Filter by Item status
+            # @option filters [String]              :sort_key       Sort key ( It can also be specified from the constant list of {Types::Account::SortKeyOrderItem}. )
+            # @option filters [String]              :sort_type      Sort direction ( 'asc' or 'desc' ) ( It can also be specified from the constant list of {Types::Common::SortDirection}. )
+            #
+            # @return [Array<Nocoah::Types::Account::OrderItem>]    When succeeded, ordered item list.
             # @raise [Nocoah::APIError]                             When failed.
             #
             # @see get_order_item_detail
             # @see https://www.conoha.jp/docs/account-order-item-list.html
-            def get_order_items_list
+            def get_order_items_list( **filters )
+                raise ArgumentError, "sort_key '#{filters[:sort_key]}' is invalid." if filters.key?( :sort_key ) && !Types::Account::SortKeyOrderItem.validate_key( filters[:sort_key] )
+                
                 json_data = api_get( "/#{@identity.config.tenant_id}/order-items", error_message: "Failed to get order-item list." )
                 return [] unless json_data.key?( 'order_items' )
                 
-                json_data['order_items'].map() do | item |
-                    Types::Account::OrderItem.new( item )
-                end
+                order_item_list = json_data['order_items'].map { | item | Types::Account::OrderItem.new( item ) }
+                # Filter by Service name
+                order_item_list.select! {
+                    | item |
+                        case filters[:service_name]
+                        when Regexp
+                            matched = !!item.service_name.match( filters[:service_name] )
+                        else
+                            matched = item.service_name == filters[:service_name]
+                        end
+                        matched
+                } if filters.key?( :service_name )
+                # Filter by Item status
+                order_item_list.select! { | item | item.item_status == filters[:item_status] } if filters.key?( :item_status )
+                # Sort
+                order_item_list.sort_by! { | item | item.instance_variable_get( "@#{filters[:sort_key]}" ) } if filters.key?( :sort_key )
+                order_item_list.reverse! if filters[:sort_type] == Types::Common::SortDirection::DESC
+
+                order_item_list
             end
 
             # Gets a ordered items info.
@@ -162,7 +186,7 @@ module Nocoah
             # Sets read status of the notification
             #
             # @param [String]   notification_code   Notification code
-            # @param [String]   read_status         Read / Unread status ( You can specify the enumerator of {Nocoah::Types::Account::ReadStatus} as an alias. )
+            # @param [String]   read_status         Read / Unread status ( It can also be specified from the constant list of {Nocoah::Types::Account::ReadStatus}. )
             #
             # @return [Nocoah::Types::Account::NotificationItem]    When succeeded, notification info.
             # @raise [Nocoah::APIError]                             When failed.
@@ -186,7 +210,7 @@ module Nocoah
             # @param            [Hash]      url_query           Optional parameter
             # @option url_query [Integer]   start_date_raw      (1 day ago) Data acquisition start time (UNIX time)
             # @option url_query [Integer]   end_date_raw        (1 day ago) Data acquisition end time (UNIX time)
-            # @option url_query [String]    mode                ("average") Data integration method ( 'average', 'max' or 'min' )
+            # @option url_query [String]    mode                ("average") Data integration method ( 'average', 'max' or 'min' ) ( It can also be specified from the constant list of {Nocoah::Types::Common::RRDMode}. )
             #
             # @note When start_date_raw or end_date_raw is specified in Date, Time or DateTime type, converts to UNIX time.
             #
@@ -203,7 +227,7 @@ module Nocoah
             # @param            [Hash]      url_query           Optional parameter
             # @option url_query [Integer]   start_date_raw      (1 day ago) Data acquisition start time (UNIX time)
             # @option url_query [Integer]   end_date_raw        (1 day ago) Data acquisition end time (UNIX time)
-            # @option url_query [String]    mode                ("average") Data integration method ( 'average', 'max' or 'min' )
+            # @option url_query [String]    mode                ("average") Data integration method ( 'average', 'max' or 'min' ) ( It can also be specified from the constant list of {Nocoah::Types::Common::RRDMode}. )
             #
             # @note When start_date_raw or end_date_raw is specified in Date, Time or DateTime type, converts to UNIX time.
             #
@@ -223,7 +247,7 @@ module Nocoah
             # @param            [Hash]      url_query           Optional parameter
             # @option url_query [Integer]   start_date_raw      (1 day ago) Data acquisition start time (UNIX time)
             # @option url_query [Integer]   end_date_raw        (1 day ago) Data acquisition end time (UNIX time)
-            # @option url_query [String]    mode                ("average") Data integration method ( 'average', 'max' or 'min' )
+            # @option url_query [String]    mode                ("average") Data integration method ( 'average', 'max' or 'min' ) ( It can also be specified from the constant list of {Nocoah::Types::Common::RRDMode}. )
             #
             # @note When start_date_raw or end_date_raw is specified in Date, Time or DateTime type, converts to UNIX time.
             #
