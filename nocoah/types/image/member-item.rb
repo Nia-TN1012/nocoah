@@ -39,6 +39,18 @@ module Nocoah
 
             end
 
+            # Member status
+            module MemberStatus
+                # Accepted
+                ACCEPTED = "accepted"
+                # Pending
+                PENDING = "pending"
+                # Rejected
+                REJECTED = "rejected"
+                # ( For filtering ) ALL member status
+                ALL = "all"
+            end
+
         end
 
     end

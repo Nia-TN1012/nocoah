@@ -31,7 +31,7 @@ module Nocoah
                 # @return [String] DKIM
                 attr_reader :dkim
 
-                # Creates a new {MailAddressItem} class instance.
+                # Creates a new {EmailItem} class instance.
                 #
                 # @param [Hash] data    Data
                 def initialize( data )

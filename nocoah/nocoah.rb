@@ -1,4 +1,3 @@
-require_relative './config'
 require_relative './identity'
 require_relative './client/base'
 require_relative './client/account'

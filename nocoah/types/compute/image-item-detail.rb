@@ -14,6 +14,7 @@ module Nocoah
             class ImageItemDetail < ImageItem
 
                 # @return [String] Image status
+                # @see Nocoah::Types::Compute::ImageStatus
                 attr_reader :status
                 # @return [DateTime] Image created time
                 attr_reader :created
@@ -46,6 +47,20 @@ module Nocoah
                     @metadata = data['metadata']
                 end
 
+            end
+
+            # Image status
+            module ImageStatus
+                # Active
+                ACTIVE = "ACTIVE"
+                # Saving
+                SAVING = "SAVING"
+                # Deleted
+                DELETED = "DELETED"
+                # In error
+                ERROR = "ERROR"
+                # Unknown status
+                UNKNOWN = "UNKNOWN"
             end
 
         end

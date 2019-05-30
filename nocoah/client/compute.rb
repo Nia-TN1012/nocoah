@@ -15,15 +15,15 @@ module Nocoah
         # Compute API
         class Compute < Base
 
-            # Compute API Endpoint ( '%s' contains a string representing the region. (e.q. 'tyo1', 'sin1' or 'sjc1') )
-            ENDPOINT_BASE = "https://compute.%s.conoha.io/v2"
+            # Endpoint key
+            ENDPOINT_KEY = :compute
 
             # Gets a virtual machine template ( flavor ) list.
             #
-            # @param            [Hash]      url_query    Options
-            # @option url_query [Integer]   min_disk     Filter by minimum disk size (GB)
-            # @option url_query [Integer]   min_ram      Filter by minimum ram size (GB)
-            # @option url_query [Integer]   limit        The number of item
+            # @param            [Hash]      url_query    URL query
+            # @option url_query [Integer]   :min_disk    Filter by minimum disk size (GB)
+            # @option url_query [Integer]   :min_ram     Filter by minimum ram size (GB)
+            # @option url_query [Integer]   :limit       The number of item
             #
             # @return [Array<Nocoah::Types::Compute::FlavorItem>]   When succeeded, virtual machine template list.
             # @raise [Nocoah::APIError]                             When failed.
@@ -43,10 +43,10 @@ module Nocoah
 
             # Gets a virtual machine template ( flavor ) detail list.
             #
-            # @param            [Hash]      url_query   Options
-            # @option url_query [Integer]   min_disk    Filter by minimum disk size (GB)
-            # @option url_query [Integer]   min_ram     Filter by minimum ram size (GB)
-            # @option url_query [Integer]   limit       The number of item
+            # @param            [Hash]      url_query   URL query
+            # @option url_query [Integer]   :min_disk   Filter by minimum disk size (GB)
+            # @option url_query [Integer]   :min_ram    Filter by minimum ram size (GB)
+            # @option url_query [Integer]   :limit      The number of item
             #
             # @return [Array<Nocoah::Types::Compute::FlavorItemDetail>]     When succeeded, flavor detail list.
             # @raise [Nocoah::APIError]                                     When failed.
@@ -77,7 +77,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-flavor-details-detail#show-flavor-details
             def get_flavor_detail( flavor_id )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/flavors/#{flavor_id}",
+                    "/#{@identity.tenant_id}/flavors/#{flavor_id}",
                     error_message: "Failed to get flavor item detail (flavor_id: #{flavor_id})."
                 )
                 return nil unless json_data.key?( 'flavor' )
@@ -87,14 +87,14 @@ module Nocoah
 
             # Gets a virtual machine list.
             #
-            # @param            [Hash]      url_query       Options
-            # @option url_query [DateTime]  changes-since   Virtual machine list ( including deleted ) from specified time
-            # @option url_query [String]    image           Image ID
-            # @option url_query [String]    flavor          Flavor ID
-            # @option url_query [String]    name            Virtual machine name
-            # @option url_query [String]    marker          Last-seen virtual machine ID
-            # @option url_query [String]    limit           Number of item
-            # @option url_query [String]    status          Virtual machine status
+            # @param            [Hash]      url_query           URL query
+            # @option url_query [DateTime]  :changes-since      Virtual machine list ( including deleted ) from specified time
+            # @option url_query [String]    :image              Image ID
+            # @option url_query [String]    :flavor             Flavor ID
+            # @option url_query [String]    :name               Virtual machine name
+            # @option url_query [String]    :marker             Last-seen virtual machine ID
+            # @option url_query [String]    :limit              Number of item
+            # @option url_query [String]    :status             Virtual machine status ({Nocoah::Types::Compute::ServerStatus})
             #
             # @return [Array<Nocoah::Types::Compute::ServerItem>]   When succeeded, virtual machine list.
             # @raise [Nocoah::APIError]                             When failed.
@@ -116,14 +116,14 @@ module Nocoah
 
             # Gets a virtual machine detail list.
             #
-            # @param            [Hash]      url_query       Options
-            # @option url_query [DateTime]  changes-since   Virtual machine list ( including deleted ) from specified time
-            # @option url_query [String]    image           Image ID
-            # @option url_query [String]    flavor          Flavor ID
-            # @option url_query [String]    name            Virtual machine name
-            # @option url_query [String]    marker          Last-seen virtual machine ID
-            # @option url_query [String]    limit           Number of item
-            # @option url_query [String]    status          Virtual machine status
+            # @param            [Hash]      url_query           URL query
+            # @option url_query [DateTime]  :changes-since      Virtual machine list ( including deleted ) from specified time
+            # @option url_query [String]    :image              Image ID
+            # @option url_query [String]    :flavor             Flavor ID
+            # @option url_query [String]    :name               Virtual machine name
+            # @option url_query [String]    :marker             Last-seen virtual machine ID
+            # @option url_query [String]    :limit              Number of item
+            # @option url_query [String]    :status             Virtual machine status ({Nocoah::Types::Compute::ServerStatus})
             #
             # @return [Array<Nocoah::Types::Compute::ServerDetailItem>]     When succeeded, virtual machine detail list.
             # @raise [Nocoah::APIError]                                     When failed.
@@ -156,7 +156,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-server-details-detail#show-server-details
             def get_server_detail( server_id )        
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}",
+                    "/#{@identity.tenant_id}/servers/#{server_id}",
                     error_message: "Failed to get server item detail (server_id: #{server_id})."
                 )
                 return nil unless json_data.key?( 'server' )
@@ -166,13 +166,13 @@ module Nocoah
 
             # Gets a image list.
             #
-            # @param            [Hash]      url_query       Options
-            # @option url_query [DateTime]  changes-since   Image list ( including deleted ) from specified time
-            # @option url_query [String]    name            Image name
-            # @option url_query [String]    status          Image status
-            # @option url_query [String]    marker          Last-seen image ID
-            # @option url_query [String]    limit           Number of item
-            # @option url_query [String]    type            Image type
+            # @param            [Hash]      url_query           URL query
+            # @option url_query [DateTime]  :changes-since      Image list ( including deleted ) from specified time
+            # @option url_query [String]    :name               Image name
+            # @option url_query [String]    :status             Image status ({Nocoah::Types::Compute::ImageStatus})
+            # @option url_query [String]    :marker             Last-seen image ID
+            # @option url_query [String]    :limit              Number of item
+            # @option url_query [String]    :type               Image type ({Nocoah::Types::Compute::ImageType})
             #
             # @return [Array<Nocoah::Types::Compute::ImageItem>]    When succeeded, Image list.
             # @raise [Nocoah::APIError]                             When failed.
@@ -194,13 +194,13 @@ module Nocoah
 
             # Gets a image detail list.
             #
-            # @param            [Hash]      url_query       Options
-            # @option url_query [DateTime]  changes-since   Image list ( including deleted ) from specified time
-            # @option url_query [String]    name            Image name
-            # @option url_query [String]    status          Image status
-            # @option url_query [String]    marker          Last-seen image ID
-            # @option url_query [String]    limit           Number of item
-            # @option url_query [String]    type            Image type
+            # @param            [Hash]      url_query           URL query
+            # @option url_query [DateTime]  :changes-since      Image list ( including deleted ) from specified time
+            # @option url_query [String]    :name               Image name
+            # @option url_query [String]    :status             Image status ({Nocoah::Types::Compute::ImageStatus})
+            # @option url_query [String]    :marker             Last-seen image ID
+            # @option url_query [String]    :limit              Number of item
+            # @option url_query [String]    :type               Image type ({Nocoah::Types::Compute::ImageType})
             #
             # @return [Array<Nocoah::Types::Compute::ImageDetailItem>]  When succeeded, Image detail list.
             # @raise [Nocoah::APIError]                                 When failed.
@@ -233,7 +233,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-image-details-detail#show-image-details
             def get_image_detail( image_id )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/images/#{image_id}",
+                    "/#{@identity.tenant_id}/images/#{image_id}",
                     error_message: "Failed to get image item detail (image_id: #{image_id})."
                 )
                 return nil unless json_data.key?( 'image' )
@@ -246,23 +246,69 @@ module Nocoah
             # @param            [String]            image_id                    Image ID
             # @param            [String]            flavor_id                   Flavor ID
             # @param            [Hash]              options                     Optional settings
-            # @option options   [String]            adminPass                   (nil) Root password
-            # @option options   [String]            key_name                    (nil) SSH key name ( when using SSH key authentication )
-            # @option options   [Array<String>]     security_groups             (nil) Security groups names
-            # @option options   [String]            instance_name_tag           (nil) Virtual machine name tag
-            # @option options   [String]            volume_id                   (nil) Addtional disk ID ( when using an additional disk )
-            # @option options   [String]            vncKeymap                   (nil) Key map ( 'en-us' or 'ja' )
-            # @option options   [String]            startup_script              (nil) Startup script
-            # @option options   [String]            startup_script_path         (nil) Startup script file path 
-            # @option options   [Boolean]           encode_startup_script       (false) When true, encode the startup script specified in the argument into Base64 format.
+            # @option options   [String]            :adminPass                  (nil) Root password
+            # @option options   [String]            :key_name                   (nil) SSH key name ( when using SSH key authentication )
+            # @option options   [Array<String>]     :security_groups            (nil) Security groups names
+            # @option options   [Hash]              :metadata                   (nil) Virtual machine metadata
+            # @option options   [String]            :instance_name_tag          (nil) Virtual machine name tag ( If specified also in metadata, this takes precedence. )
+            # @option options   [Array<String>]     :volume_ids                 (nil) Addtional disk ID ( when using an additional disk )
+            # @option options   [String]            :vncKeymap                  (nil) Key map ( 'en-us' or 'ja' )
+            # @option options   [String]            :startup_script             (nil) Startup script ( If specified with startup_script_path, this takes precedence. )
+            # @option options   [String]            :startup_script_path        (nil) Startup script file path 
+            # @option options   [Boolean]           :encode_startup_script      (false) When true, encode the startup script specified in the argument into Base64 format.
             #
             # @return [Nocoah::Types::Compute::CreateServerResult]      When succeeded, created virtual machine item.
             # @raise [Nocoah::APIError]                                 When failed.
             #
-            # @note If both startup_script and startup_script_path are specified, only startup_script is used.
-            # @note Startup script can be specified up to 16KiB without being encoded.
-            # @note The headers that can be used in the startup script are '#!', '#include-once', '#include', '#cloud-config' or '#cloud-boothook'.
-            # @note Startup scripts are not supported on Windows OS.
+            # @example Normal use
+            #   create_server(
+            #        image_id: "1f7bcc63-4a18-4371-85b1-bcdd4301ff31",
+            #        flavor_id: "b60acd11-3fd5-46e1-9387-aae4737d49aa",
+            #        adminPass: "72LY2hf38Kf84vCy4sUr"
+            #   )
+            # 
+            # @example Specifies a SSH key
+            #   create_server(
+            #        image_id: "1f7bcc63-4a18-4371-85b1-bcdd4301ff31",
+            #        flavor_id: "b60acd11-3fd5-46e1-9387-aae4737d49aa",
+            #        adminPass: "72LY2hf38Kf84vCy4sUr",
+            #        key_name: "mikumo-conoha-key-01"
+            #   )
+            #
+            # @example Specifies a metadata
+            #   create_server(
+            #        image_id: "1f7bcc63-4a18-4371-85b1-bcdd4301ff31",
+            #        flavor_id: "b60acd11-3fd5-46e1-9387-aae4737d49aa",
+            #        adminPass: "72LY2hf38Kf84vCy4sUr",
+            #        metadata: {
+            #           instance_name_tag: "testtest"
+            #        }
+            #   )
+            #
+            # @example Specifies an additional disk
+            #   create_server(
+            #        image_id: "1f7bcc63-4a18-4371-85b1-bcdd4301ff31",
+            #        flavor_id: "b60acd11-3fd5-46e1-9387-aae4737d49aa",
+            #        adminPass: "72LY2hf38Kf84vCy4sUr",
+            #        volume_ids: ["fa90d521-7918-4b13-ad71-7aeb8667887a"]
+            #   )
+            #
+            # @example Specifies a security groups
+            #   create_server(
+            #        image_id: "1f7bcc63-4a18-4371-85b1-bcdd4301ff31",
+            #        flavor_id: "b60acd11-3fd5-46e1-9387-aae4737d49aa",
+            #        adminPass: "72LY2hf38Kf84vCy4sUr",
+            #        security_groups: ["default", "another-secgroup-name"]
+            #   )
+            #
+            # @example Specifies a startup script
+            #   create_server(
+            #        image_id: "1f7bcc63-4a18-4371-85b1-bcdd4301ff31",
+            #        flavor_id: "b60acd11-3fd5-46e1-9387-aae4737d49aa",
+            #        adminPass: "72LY2hf38Kf84vCy4sUr",
+            #        startup_script: "#cloud-config\nruncmd:\n - echo \"ConoHa StartUp Script\" >> /var/tmp/test.txt\n",
+            #        encode_startup_script: true
+            #   )
             #
             # @see https://www.conoha.jp/docs/compute-create_vm.html
             # @see https://support.conoha.jp/v/startupscript/
@@ -279,23 +325,22 @@ module Nocoah
 
                 # Security group
                 if options.key?( :security_groups ) && !options[:security_groups].empty?
-                    server_options[:security_groups] = options[:security_groups].map do | sg |
-                        { name: sg }
-                    end
+                    server_options[:security_groups] = options[:security_groups].map { | sg | { name: sg } }
                 end
 
                 # Metadata
-                if options.key?( :instance_name_tag )
+                if options.key?( :metadata )
+                    server_options[:metadata] = options[:metadata]
+                    server_options[:metadata][:instance_name_tag] = options[:instance_name_tag] if options.key?( :instance_name_tag )
+                elsif options.key?( :instance_name_tag )
                     server_options[:metadata] = {
                         instance_name_tag: options[:instance_name_tag]
                     }
                 end
 
                 # Additional disk
-                if options.key?( :volume_id )
-                    server_options[:block_device_mapping] = [{
-                        volume_id: options[:volume_id]
-                    }]
+                if options.key?( :volume_ids ) && !options[:volume_ids].empty?
+                    server_options[:block_device_mapping] = options[:volume_ids].map { | volume_id | { volume_id: volume_id } }
                 end
 
                 # Startup script
@@ -306,7 +351,7 @@ module Nocoah
                 end
 
                 json_data = api_post(
-                    "/#{@identity.config.tenant_id}/servers",
+                    "/#{@identity.tenant_id}/servers",
                     body: {
                         server: server_options
                     },
@@ -330,7 +375,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=delete-server-detail#delete-server
             def delete_server( server_id )
                 api_delete(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}",
+                    "/#{@identity.tenant_id}/servers/#{server_id}",
                     error_message: "Failed to delete virtual machine (server_id: #{server_id})."
                 ) do | res |
                     server_id
@@ -389,6 +434,14 @@ module Nocoah
             # @return [Nocoah::Types::Compute::RebuildServerResult]     When succeeded, rebuilt virtual machine item.
             # @raise [Nocoah::APIError]                                 When failed.
             #
+            # @example 
+            #   rebuild_server(
+            #        "(server_id)",
+            #        image_id: "1f7bcc63-4a18-4371-85b1-bcdd4301ff31",
+            #        adminPass: "mt1293sxgdS",
+            #        key_name: "vps-sample-key-01"
+            #   )
+            #
             # @see https://www.conoha.jp/docs/compute-re_install.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=rebuild-server-rebuild-action-detail#rebuild-server-rebuild-action
             def rebuild_server( server_id, image_id:, **options )
@@ -399,7 +452,7 @@ module Nocoah
                 rebuild_options[:key_name] = options[:key_name] if options.key?( :key_name )
                         
                 json_data = api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/action",
                     body: {
                         rebuild: rebuild_options
                     },
@@ -428,7 +481,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=resize-server-resize-action-detail#resize-server-resize-action
             def resize_server( server_id, flavor_id: )
                 api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/action",
                     body: {
                         resize: {
                             flavorRef: flavor_id
@@ -455,7 +508,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=confirm-resized-server-confirmresize-action-detail#confirm-resized-server-confirmresize-action
             def confirm_resize_server( server_id )
                 api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action", 
+                    "/#{@identity.tenant_id}/servers/#{server_id}/action", 
                     body: {
                         confirmResize: nil
                     },
@@ -480,7 +533,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=revert-resized-server-revertresize-action-detail#revert-resized-server-revertresize-action
             def revert_resize_server( server_id )
                 api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/action",
                     body: {
                         revertResize: nil
                     },
@@ -549,13 +602,19 @@ module Nocoah
             # @return [String]              When succeeded, server ID.
             # @raise [Nocoah::APIError]     When failed.
             #
+            # @example 
+            #   create_server_image(
+            #        "(server_id)",
+            #        image_name: "example_snap01"
+            #   )
+            #
             # @note Target virtual machine must be stopped.
             #
             # @see https://www.conoha.jp/docs/compute-create_image.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=create-image-createimage-action-detail#create-image-createimage-action
             def create_server_image( server_id, image_name: )
                 api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action", 
+                    "/#{@identity.tenant_id}/servers/#{server_id}/action", 
                     body: {
                         createImage: {
                             name: image_name
@@ -570,7 +629,7 @@ module Nocoah
             # Changes the storage controller.
             #
             # @param [String]   server_id       Server ID
-            # @param [String]   hw_disk_bus     Disk bus ( "virtio", "scsi" or "ide" )
+            # @param [String]   hw_disk_bus     Disk bus ( "virtio", "scsi" or "ide" ) ({Nocoah::Types::Compute::HWDiskBus})
             #
             # @note Target virtual machine must be stopped.
             #
@@ -578,14 +637,14 @@ module Nocoah
             # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/compute-hw_disk_bus.html
-            def change_storage_controller( server_id, hw_disk_bus: "virtio" )
+            def change_storage_controller( server_id, hw_disk_bus: Types::Compute::HWDiskBus::VIRTIO )
                 change_vm_hardware_core( server_id, target_hw: { hwDiskBus: hw_disk_bus } )
             end
 
             # Changes the network adapter.
             #
             # @param [String]   server_id           Server ID
-            # @param [String]   hw_vif_model        Network adapter ( "e1000", "virtio" or "rtl8139" )
+            # @param [String]   hw_vif_model        Network adapter ( "e1000", "virtio" or "rtl8139" ) ({Nocoah::Types::Compute::HWVifModel})
             #
             # @note Target virtual machine must be stopped.
             #
@@ -593,14 +652,14 @@ module Nocoah
             # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/compute-hw_vif_model.html
-            def change_network_adapter( server_id, hw_vif_model: "virtio" )
+            def change_network_adapter( server_id, hw_vif_model: Types::Compute::HWVifModel::VIRTIO )
                 change_vm_hardware_core( server_id, target_hw: { hwVifModel: hw_vif_model } )
             end
 
             # Changes the video device.
             #
             # @param [String]   server_id           Server ID
-            # @param [String]   hw_video_model      Video device ( "qxl", "vga" or "cirrus" )
+            # @param [String]   hw_video_model      Video device ( "qxl", "vga" or "cirrus" ) ({Nocoah::Types::Compute::HWVideoModel})
             #
             # @note Target virtual machine must be stopped.
             #
@@ -608,14 +667,14 @@ module Nocoah
             # @raise [Nocoah::APIError]     When failed.
             #
             # @see https://www.conoha.jp/docs/compute-hw_video_model.html
-            def change_video_device( server_id, hw_video_model: "vga" )
+            def change_video_device( server_id, hw_video_model: Types::Compute::HWVideoModel::VGA )
                 change_vm_hardware_core( server_id, target_hw: { hwVideoModel: hw_video_model } )
             end
 
             # Changes the console key map.
             #
             # @param [String]   server_id       Server ID
-            # @param [String]   vnc_keymap      Video device ( "en-us" or "ja" )
+            # @param [String]   vnc_keymap      VNC key map ( "en-us" or "ja" ) ({Nocoah::Types::Compute::VNCKeymap})
             #
             # @note Target virtual machine must be stopped.
             #
@@ -625,7 +684,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-vnc_key_map.html
             def change_key_map( server_id, vnc_keymap: )
                 api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action", 
+                    "/#{@identity.tenant_id}/servers/#{server_id}/action", 
                     body: {
                         vncKeymap: vnc_keymap
                     },
@@ -648,7 +707,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-insert_iso_image.html
             def mount_iso_image( server_id, iso_path: )
                 api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/action",
                     body: {
                         mountImage: iso_path
                     },
@@ -670,7 +729,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-eject_iso_image.html
             def unmount_iso_image( server_id )
                 api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action", 
+                    "/#{@identity.tenant_id}/servers/#{server_id}/action", 
                     body: {
                         unmountImage: ""
                     },
@@ -690,7 +749,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-get_secgroups_status.html
             def get_security_group_list( server_id )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-security-groups",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/os-security-groups",
                     error_message: "Failed to get security group list (server_id: #{server_id})."
                 )
             end
@@ -705,7 +764,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=list-keypairs-detail#list-keypairs
             def get_keypair_list
                 json_data = api_get( 
-                    "/#{@identity.config.tenant_id}/os-keypairs", 
+                    "/#{@identity.tenant_id}/os-keypairs", 
                     error_message: "Failed to get key-pair list."
                 )
                 return [] unless json_data.key?( 'keypairs' )
@@ -725,7 +784,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-keypair-details-detail#show-keypair-details
             def get_keypair_detail( keypair_name )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/os-keypairs/#{keypair_name}", 
+                    "/#{@identity.tenant_id}/os-keypairs/#{keypair_name}", 
                     error_message: "Failed to get key-pair item detail (keypair_name: #{keypair_name})." 
                 )
                 return nil unless json_data.key?( 'keypair' )
@@ -745,6 +804,17 @@ module Nocoah
             # @note If you create a key on the Nova side, the private key can only be obtained via this return value. 
             #       Make sure to save this, as there is no way to get this private key again in the future.
             #
+            # @example Specifies a public key
+            #   add_keypair(
+            #        "(keypair_name)",
+            #        public_key: "ssh-rsa ..."
+            #   )
+            #
+            # @example Nova generates a SSH key
+            #   add_keypair(
+            #        "(keypair_name)"
+            #   )
+            #
             # @see https://www.conoha.jp/docs/compute-add_keypair.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=create-or-import-keypair-detail#create-or-import-keypair
             def add_keypair( keypair_name, public_key: nil, public_key_path: nil )
@@ -760,7 +830,7 @@ module Nocoah
                 end
         
                 json_data = api_post( 
-                    "/#{@identity.config.tenant_id}/os-keypairs",
+                    "/#{@identity.tenant_id}/os-keypairs",
                     body: body,
                     error_message: "Failed to add key-pair (keypair_name: #{keypair_name}, public_key: #{public_key}, public_key_path: #{public_key_path})."
                 )
@@ -780,7 +850,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=create-or-import-keypair-detail#create-or-import-keypair
             def delete_keypair( keypair_name )
                 api_delete(
-                    "#{@endpoint}/#{@identity.config.tenant_id}/os-keypairs/#{keypair_name}",
+                    "#{@endpoint}/#{@identity.tenant_id}/os-keypairs/#{keypair_name}",
                     error_message: "Failed to delete key-pair (keypair_name: #{keypair_name})."
                 ) do | res |
                     keypair_name
@@ -799,7 +869,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=list-volume-attachments-for-an-instance-detail#list-volume-attachments-for-an-instance
             def get_attached_volume_list( server_id )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/os-volume_attachments",
                     error_message: "Failed to get attached volume list (server_id: #{server_id})."
                 )
                 return [] unless json_data.key?( 'volumeAttachments' )
@@ -822,7 +892,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-a-detail-of-a-volume-attachment-detail#show-a-detail-of-a-volume-attachment
             def get_attached_volume_item( server_id, attachment_id: )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments/#{attachment_id}",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/os-volume_attachments/#{attachment_id}",
                     error_message: "Failed to get attached volume item (server_id: #{server_id}, attachment_id: #{attachment_id})."
                 )
                 return nil unless json_data.key?( 'volumeAttachment' )
@@ -834,25 +904,28 @@ module Nocoah
             #
             # @param [String]   server_id       Server ID
             # @param [String]   volume_id       Volume ID
+            # @param [String]   device          Device ( e.g. "/dev/vdb" ) 
             #
             # @return [Nocoah::Types::Compute::AttachedVolumeItem]      When succeeded, attached volume item.
             # @raise [Nocoah::APIError]                                 When failed.
             #
             # @note Target virtual machine must be stopped.
-            # @note As ConoHa is possible to attach only one additional disk, device is always specified as "/dev/vdb".
-            #       If the target virtual machine is already attached to another volume, cannot attach.
+            # @note ConoHa: It is possible to attach only one additional disk, device is always specified as "/dev/vdb".
             #
-            # @see detach_volume
             # @see https://www.conoha.jp/docs/compute-attach_volume.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=attach-a-volume-to-an-instance-detail#attach-a-volume-to-an-instance
-            def attach_volume( server_id, volume_id: )
+            def attach_volume( server_id, volume_id:, device: nil )
+                device = "/dev/vdb" if @identity.public_cloud_key == Endpoints::PublicCloudKey::CONOHA
+
+                volume_attachment = {
+                    volumeId: volume_id
+                }
+                volume_attachment[:device] = device if !device.nil?
+
                 json_data = api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments", 
+                    "/#{@identity.tenant_id}/servers/#{server_id}/os-volume_attachments", 
                     body: {
-                        volumeAttachment: {
-                            volumeId: volume_id,
-                            device: "/dev/vdb"
-                        }
+                        volumeAttachment: volume_attachment
                     }, 
                     error_message: "Failed to get attach volume (server_id: #{server_id}, volume_id: #{volume_id})."
                 )
@@ -871,12 +944,11 @@ module Nocoah
             #
             # @note Target virtual machine must be stopped.
             #
-            # @see attach_volume
             # @see https://www.conoha.jp/docs/compute-dettach_volume.html
             # @see https://developer.openstack.org/api-ref/compute/?expanded=detach-a-volume-from-an-instance-detail#detach-a-volume-from-an-instance
             def detach_volume( server_id, attachment_id: )
                 api_delete(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-volume_attachments/#{attachment_id}",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/os-volume_attachments/#{attachment_id}",
                     error_message: "Failed to get detach volume (server_id: #{server_id}, attachment_id: #{attachment_id})."
                 ) do | res |
                     server_id
@@ -895,7 +967,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=list-port-interfaces-detail#list-port-interfaces
             def get_attached_interface_list( server_id )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-interface",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/os-interface",
                     error_message: "Failed to get attached interface list (server_id: #{server_id})."
                 )
                 return [] unless json_data.key?( 'interfaceAttachments' )
@@ -918,7 +990,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-port-interface-details-detail#show-port-interface-details
             def get_attached_interface_item( server_id, port_id: )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-interface/#{port_id}",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/os-interface/#{port_id}",
                     error_message: "Failed to get attached interface item (server_id: #{server_id}, port_id: #{port_id})."
                 )
                 return nil unless json_data.key?( 'interfaceAttachment' )
@@ -935,7 +1007,7 @@ module Nocoah
             # @raise [Nocoah::APIError]                                     When failed.
             #
             # @note Target virtual machine must be stopped.
-            # @note In ConoHa, the number of interfaces that can be connected is as follows.
+            # @note ConoHa: The number of interfaces that can be connected is as follows.
             #   {
             #       'Additional IP port': 1,
             #       'Local network IP port': 2,
@@ -947,7 +1019,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=create-interface-detail#create-interface
             def attach_interface( server_id, port_id: )
                 json_data = api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-interface",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/os-interface",
                     body: {
                         interfaceAttachment: {
                             port_id: port_id
@@ -975,7 +1047,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=detach-interface-detail#detach-interface
             def detach_interface( server_id, port_id: )
                 api_delete(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/os-interface/#{port_id}",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/os-interface/#{port_id}",
                     error_message: "Failed to get detach interface (server_id: #{server_id}, port_id: #{port_id})."
                 ) do | res |
                     server_id
@@ -993,7 +1065,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=list-all-metadata-detail#list-all-metadata
             def get_server_metadata( server_id )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/metadata",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/metadata",
                     error_message: "Failed to get metadata (server_id: #{server_id})."
                 )
                 json_data['metadata']
@@ -1012,7 +1084,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=replace-metadata-items-detail#replace-metadata-items
             def set_server_metadata( server_id, **metadata )
                 json_data = api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/metadata",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/metadata",
                     body: {
                         metadata: metadata
                     },
@@ -1033,7 +1105,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=list-ips-detail#list-ips
             def get_server_addresses( server_id )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/ips",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/ips",
                     error_message: "Failed to get addresses (server_id: #{server_id})."
                 )
                 return [] unless json_data.key?( 'addresses' )
@@ -1056,7 +1128,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/compute/?expanded=show-ip-details-detail#show-ip-details
             def get_server_addresses_by_network( server_id, network_label: )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/ips/#{network_label}",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/ips/#{network_label}",
                     error_message: "Failed to get addresses (server_id: #{server_id}, network_label: #{network_label})."
                 )
                 return nil unless json_data.key?( network_label )
@@ -1136,7 +1208,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/backup-get_backup_list.html
             def get_backup_list
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/backup",
+                    "/#{@identity.tenant_id}/backup",
                     error_message: "Failed to get backup list."
                 )
                 return [] unless json_data.key?( 'backup' )
@@ -1157,7 +1229,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/backup-get_backup_list_detailed.html
             def get_backup_item( backup_id )
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/backup/#{backup_id}",
+                    "/#{@identity.tenant_id}/backup/#{backup_id}",
                     error_message: "Failed to get backup item (backup_id: #{backup_id})."
                 )
                 return nil unless json_data.key?( 'backup' )
@@ -1179,7 +1251,7 @@ module Nocoah
             # @see https://www.conoha.jp/vps/pricing/
             def start_server_backup( server_id )
                 json_data = api_post(
-                    "/#{@identity.config.tenant_id}/backup",
+                    "/#{@identity.tenant_id}/backup",
                     body: {
                         backup: {
                             instance_id: server_id
@@ -1202,7 +1274,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/backup-end_backup.html
             def end_server_backup( backup_id )
                 api_delete(
-                    "/#{@identity.config.tenant_id}/backup/#{backup_id}",
+                    "/#{@identity.tenant_id}/backup/#{backup_id}",
                     error_message: "Failed to stop backup (backup_id: #{backup_id})."
                 ) do | res |
                     backup_id
@@ -1222,7 +1294,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/backup-restore_backup.html
             def restore_server_backup( backup_id, backuprun_id: )
                 api_post(
-                    "/#{@identity.config.tenant_id}/backup/#{backup_id}/action",
+                    "/#{@identity.tenant_id}/backup/#{backup_id}/action",
                     body: {
                         restore: {
                             backuprun_id: backuprun_id
@@ -1248,7 +1320,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/backup-backup_to_image_object.html
             # def save_server_backup_to_image( backup_id, backuprun_id:, image_name: )
             #     api_post(
-            #         "/#{@identity.config.tenant_id}/backup/#{backup_id}/action",
+            #         "/#{@identity.tenant_id}/backup/#{backup_id}/action",
             #         body: {
             #             createImage: {
             #                 backuprun_id: backuprun_id,
@@ -1269,7 +1341,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/compute-iso-list-show.html
             def get_iso_image_list
                 json_data = api_get(
-                    "/#{@identity.config.tenant_id}/iso-images",
+                    "/#{@identity.tenant_id}/iso-images",
                     error_message: "Failed to get ISO image list."
                 )
             end
@@ -1287,7 +1359,7 @@ module Nocoah
             # @return [Hash]                When succeeded, flavor list.
             # @raise [Nocoah::APIError]     When failed.
             def get_flavor_list_core( is_detail = false, **url_query )
-                uri = URI.parse( "/#{@identity.config.tenant_id}/flavors#{is_detail ? "/detail" : ""}" )
+                uri = URI.parse( "/#{@identity.tenant_id}/flavors#{is_detail ? "/detail" : ""}" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
         
                 api_get( uri.to_s, error_message: "Failed to get flavor #{is_detail ? "detail list" : "list"} (url_query: #{url_query})." )
@@ -1320,7 +1392,7 @@ module Nocoah
                     end
                 end
 
-                uri = URI.parse( "#{@endpoint}/#{@identity.config.tenant_id}/servers#{is_detail ? "/detail" : ""}" )
+                uri = URI.parse( "#{@endpoint}/#{@identity.tenant_id}/servers#{is_detail ? "/detail" : ""}" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
         
                 api_get( uri.to_s, error_message: "Failed to get server #{is_detail ? "detail list" : "list"} (url_query: #{url_query_org})." )
@@ -1352,7 +1424,7 @@ module Nocoah
                     end
                 end
 
-                uri = URI.parse( "#{@endpoint}/#{@identity.config.tenant_id}/images#{is_detail ? "/detail" : ""}" )
+                uri = URI.parse( "#{@endpoint}/#{@identity.tenant_id}/images#{is_detail ? "/detail" : ""}" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
 
                 api_get( uri.to_s, error_message: "Failed to get image #{is_detail ? "detail list" : "list"} (url_query: #{url_query_org})." )
@@ -1378,7 +1450,7 @@ module Nocoah
                 end
 
                 api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/action",
                     body: body,
                     error_message: "Failed to #{action_name} virtual machine (server_id: #{server_id})."
                 ) do | res |
@@ -1395,7 +1467,7 @@ module Nocoah
             # @raise [Nocoah::APIError]     When failed.
             def get_console_url_core( server_id, target_console: )
                 json_data = api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/action",
                     body: target_console,
                     error_message: "Failed to get console connection url (server_id: #{server_id})."
                 )
@@ -1412,7 +1484,7 @@ module Nocoah
             # @raise [Nocoah::APIError]     When failed.
             def change_vm_hardware_core( server_id, target_hw: )
                 api_post(
-                    "/#{@identity.config.tenant_id}/servers/#{server_id}/action",
+                    "/#{@identity.tenant_id}/servers/#{server_id}/action",
                     body: target_hw,
                     error_message: "Failed to change hardware (server_id: #{server_id}, target_hw: #{target_hw})."
                 ) do | res |
@@ -1439,7 +1511,7 @@ module Nocoah
                 url_query[:start_date_raw] = url_query[:start_date_raw].to_i if Types::Common.kind_of_date_or_time?( url_query[:start_date_raw] )
                 url_query[:end_date_raw] = url_query[:end_date_raw].to_i if Types::Common.kind_of_date_or_time?( url_query[:end_date_raw] )
 
-                uri = URI.parse( "#{@endpoint}/#{@identity.config.tenant_id}/servers/#{server_id}/rrd/#{target_rrd}" )
+                uri = URI.parse( "#{@endpoint}/#{@identity.tenant_id}/servers/#{server_id}/rrd/#{target_rrd}" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
         
                 json_data = api_get( uri.to_s, error_message: error_message )

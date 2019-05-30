@@ -16,8 +16,15 @@ module Nocoah
         # @see https://support.conoha.jp/v/geodns/
         class DNS < Base
 
-            # Database API Endpoint ( '%s' contains a string representing the region. )
-            ENDPOINT_BASE = "https://dns-service.%s.conoha.io/v1"
+            # Endpoint key
+            ENDPOINT_KEY = :dns
+
+            # There is no corresponding API for this method. Always returns nil.
+            #
+            # @return [nil] Always returns nil.
+            def version
+                nil
+            end
 
             # Gets a domain list
             #

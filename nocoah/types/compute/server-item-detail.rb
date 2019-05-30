@@ -19,6 +19,7 @@ module Nocoah
             class ServerItemDetail < ServerItem
 
                 # @return [String] Server status
+                # @see Nocoah::Types::Compute::ServerStatus
                 attr_reader :status
                 # @return [DateTime] Server updated
                 attr_reader :updated
@@ -110,6 +111,90 @@ module Nocoah
                     @metadata = data['metadata']
                 end
 
+            end
+
+            # Virtual machine status
+            #
+            # @see https://developer.openstack.org/api-ref/compute/?expanded=list-servers-detail#list-servers
+            module ServerStatus
+                # Active
+                ACTIVE = "ACTIVE"
+                # Building
+                BUILD = "BUILD"
+                # Permanently deleted
+                DELETED = "DELETED"
+                # In error
+                ERROR = "ERROR"
+                # Hard rebooting
+                HARD_REBOOT = "HARD_REBOOT"
+                # Migrating to a new host
+                MIGRATING = "MIGRATING"
+                # Password reset
+                PASSWORD = "PASSWORD"
+                # Paused
+                PAUSED = "PAUSED"
+                # Rebooting
+                REBOOT = "REBOOT"
+                # Rebuilding
+                REBUILD = "REBUILD"
+                # Rescue mode
+                RESCUE = "RESCUE"
+                # Resizing
+                RESIZE = "RESIZE"
+                # Reverting resize
+                REVERT_RESIZE = "REVERT_RESIZE"
+                # Shelved
+                SHELVED = "SHELVED"
+                # Shelved offloaded
+                SHELVED_OFFLOADED = "SHELVED_OFFLOADED"
+                # Powered off
+                SHUTOFF = "SHUTOFF"
+                # Marked as deleted
+                SOFT_DELETED = "SOFT_DELETED"
+                # Suspended either by request or necessity
+                SUSPENDED = "SUSPENDED"
+                # Unknown status
+                UNKNOWN = "UNKNOWN"
+                # Awaiting confirmation that the resized virtual machine
+                VERIFY_RESIZE = "VERIFY_RESIZE"
+            end
+
+            # Storage controller
+            module HWDiskBus
+                # VirtIO
+                VIRTIO = "virtio"
+                # SCSI
+                SCSI = "scsi"
+                # IDE
+                IDE = "ide"
+            end
+
+            # Network adapter
+            module HWVifModel
+                # VirtIO
+                VIRTIO = "virtio"
+                # E1000
+                E1000 = "e1000"
+                # RTL8139
+                RTL8139 = "rtl8139"
+            end
+
+            # Video device
+            module HWVideoModel
+                # VGA
+                VGA = "vga"
+                # QXL
+                QXL = "qxl"
+                # Cirrus
+                CIRRUS = "cirrus"
+            end
+
+            # VNC key map
+            module VNCKeymap
+                # ja
+                JA = "ja"
+                # en-us
+                EN_US = "en-us"
             end
 
         end

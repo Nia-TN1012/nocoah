@@ -16,8 +16,8 @@ module Nocoah
         # @see https://support.conoha.jp/v/mailserver/
         class Mail < Base
 
-            # Database API Endpoint ( '%s' contains a string representing the region. )
-            ENDPOINT_BASE = "https://mail-hosting.%s.conoha.io/v1"
+            # Endpoint key
+            ENDPOINT_KEY = :mail
 
             # Gets a service list.
             #

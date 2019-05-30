@@ -14,24 +14,24 @@ module Nocoah
         # Image API
         class Image < Base
 
-            # Image API Endpoint ( '%s' contains a string representing the region. )
-            ENDPOINT_BASE = "https://image-service.%s.conoha.io/v2"
+            # Endpoint key
+            ENDPOINT_KEY = :image
 
             # Gets an image list.
             #
-            # @param            [Hash]      url_query       Options
-            # @option url_query [Integer]   limit           (nil) The number of item
-            # @option url_query [String]    marker          (nil) Last-seen image ID
-            # @option url_query [String]    name            (nil) Filters by image name
-            # @option url_query [String]    visibility      (nil) Filters by image visibility ( 'public', 'private', 'community' or 'shared' )
-            # @option url_query [String]    member_status   ("accepted") Filters by image member status ( 'accepted', 'pending', 'rejected', or 'all' )
-            # @option url_query [String]    owner           (nil) Filters by image owner ( tenant ID )
-            # @option url_query [String]    status          (nil) Filters by image status
-            # @option url_query [Integer]   size_min        Filter by minimum image size (byte)
-            # @option url_query [Integer]   size_max        Filter by maximum image size (byte)
-            # @option url_query [String]    sort_key        ("created_at") Sorts by attribute
-            # @option url_query [String]    sort_dir        ("desc") Sort direction ( 'asc' or 'desc' )
-            # @option url_query [String]    tag             (nil) Filters by image tag
+            # @param            [Hash]      url_query           URL query
+            # @option url_query [Integer]   :limit              (nil) The number of item
+            # @option url_query [String]    :marker             (nil) Last-seen image ID
+            # @option url_query [String]    :name               (nil) Filters by image name
+            # @option url_query [String]    :visibility         (nil) Filters by image visibility ( 'public', 'private', 'community' or 'shared' ) ({Nocoah::Types::Image::Visibility})
+            # @option url_query [String]    :member_status      ("accepted") Filters by image member status ( 'accepted', 'pending', 'rejected', or 'all' ) ({Nocoah::Types::Image::MemberStatus})
+            # @option url_query [String]    :owner              (nil) Filters by image owner ( tenant ID )
+            # @option url_query [String]    :status             (nil) Filters by image status ({Nocoah::Types::Image::ImageStatus})
+            # @option url_query [Integer]   :size_min           Filter by minimum image size (byte)
+            # @option url_query [Integer]   :size_max           Filter by maximum image size (byte)
+            # @option url_query [String]    :sort_key           ("created_at") Sorts by attribute ({Nocoah::Types::Image::SortKeyImage})
+            # @option url_query [String]    :sort_dir           ("desc") Sort direction ( 'asc' or 'desc' ) ({Types::Common::SortDirection})
+            # @option url_query [String]    :tag                (nil) Filters by image tag
             #
             # @return [Array<Nocoah::Types::Image::ImageItem>]      When succeeded, image list.
             # @raise [Nocoah::APIError]                             When failed.
@@ -164,7 +164,7 @@ module Nocoah
                 end
             end
 
-            # Sets the image storage quota of the region set in {Nocoah::Config}.
+            # Sets the image storage quota of the region set in {Nocoah::Identity}.
             #
             # @param [String]   image_quota     Image quota ( e.g. "550GB" )
             #
@@ -180,15 +180,15 @@ module Nocoah
                     "/quota",
                     body: {
                         quota: {
-                            "#{@identity.config.region}_image_size": image_quota
+                            "#{@identity.region}_image_size": image_quota
                         }
                     },
                     error_message: "Failed to set image quota (image_quota: #{image_quota})."
                 )
-                json_data['quota']["#{@identity.config.region}_image_size"]
+                json_data['quota']["#{@identity.region}_image_size"]
             end
 
-            # Gets the image storage quota of the region set in {Nocoah::Config}.
+            # Gets the image storage quota of the region set in {Nocoah::Identity}.
             #
             # @return [String]              When succeeded, image quota.
             # @raise [Nocoah::APIError]     When failed.
@@ -196,7 +196,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/image-set_quota.html
             def get_image_quota
                 json_data = api_get( "/quota", error_message: "Failed to get image quota info." )
-                json_data['quota']["#{@identity.config.region}_image_size"]
+                json_data['quota']["#{@identity.region}_image_size"]
             end
 
             private

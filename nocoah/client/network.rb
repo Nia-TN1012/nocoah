@@ -14,8 +14,8 @@ module Nocoah
         # Network API
         class Network < Base
 
-            # Network API Endpoint ( '%s' contains a string representing the region. )
-            ENDPOINT_BASE = "https://networking.%s.conoha.io/v2.0"
+            # Endpoint key
+            ENDPOINT_KEY = :network
 
             # Gets a network list.
             #

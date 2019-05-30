@@ -1,5 +1,4 @@
 require_relative '../errors'
-require_relative '../config'
 require_relative '../identity'
 
 # Nocoah
@@ -11,30 +10,28 @@ module Nocoah
         # Base
         class Base
 
-            # API Endpoint ( '%s' contains a string representing the region. (e.q. 'tyo1', 'sin1' or 'sjc1') )
-            ENDPOINT_BASE = "https://identity.%s.conoha.io/v2.0"
-
             ## HTTP Client
             @@http_client = HTTPClient.new;
+
+            # Endpoint key
+            ENDPOINT_KEY = ""
 
             # Initializes a new Base instance.
             #
             # @param          [Hash]                options             Options
             # @option options [ConoHa::Identity]    :identity           The ConoHa::Identity instance.
-            # @option options [ConoHa::Config]      :config             The ConoHa::Config instance.
             # @option options [String]              :config_file_path   The JSON file path that describes the credential configuration information of ConoHa API account
             # @option options [Hash]                :api_account        The hash object that stores ConoHa API user, password, tenant ID, and region.
             #
             # @note
             #   Priority:
             #     1. :identity ( when specified )
-            #     2. :config ( when specified )
-            #     3. :config_file_path ( when specified )
-            #     4. :api_account ( when specified )
-            #     5. Environment variables ( 'NOCOAH_...' )
-            #     6. Environment variables ( 'CONOHA_...' )
-            #     7. Loads from '~/.nocoah/config'
-            #     8. Loads from '~/.conoha/config'
+            #     2. :config_file_path ( when specified )
+            #     3. :api_account ( when specified )
+            #     4. Environment variables ( 'NOCOAH_...' )
+            #     5. Environment variables ( 'CONOHA_...' )
+            #     6. Loads from '~/.nocoah/config'
+            #     7. Loads from '~/.conoha/config'
             # 
             # @see Nocoah::Config
             def initialize( **options )
@@ -44,7 +41,7 @@ module Nocoah
                     @identity = Nocoah::Identity.new( options )
                 end
                 
-                @endpoint = sprintf( self.class::ENDPOINT_BASE, @identity.config.region )
+                @endpoint = sprintf( @identity.api_endpoints[self.class::ENDPOINT_KEY], @identity.region )
             end
 
             # Get a API version info.

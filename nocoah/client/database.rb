@@ -16,8 +16,8 @@ module Nocoah
         # @see https://www.conoha.jp/database/
         class Database < Base
 
-            # Database API Endpoint ( '%s' contains a string representing the region. )
-            ENDPOINT_BASE = "https://database-hosting.%s.conoha.io/v1"
+            # Endpoint key
+            ENDPOINT_KEY = :database
 
             # Gets a service list.
             #

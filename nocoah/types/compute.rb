@@ -26,7 +26,6 @@ module Nocoah
                 CRASHED = 6
                 # Suspended
                 SUSPENDED = 7
-
             end
 
         end

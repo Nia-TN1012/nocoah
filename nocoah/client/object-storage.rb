@@ -14,8 +14,8 @@ module Nocoah
         # Object Storage API
         class ObjectStorage < Base
 
-            # Object Storage API Endpoint ( '%s' contains a string representing the region. )
-            ENDPOINT_BASE = "https://object-storage.%s.conoha.io/v1"
+            # Endpoint key
+            ENDPOINT_KEY = :object_storage
 
             # There is no corresponding API for this method. Always returns nil.
             #
@@ -32,7 +32,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/swift-show_account_details_and_list_containers.html
             # @see https://developer.openstack.org/api-ref/object-store/?expanded=show-account-details-and-list-containers-detail#show-account-details-and-list-containers
             def get_account_info
-                json_data = api_get( "/nc_#{@identity.config.tenant_id}", error_message: "Failed to get account info." ) do | res |
+                json_data = api_get( "/nc_#{@identity.tenant_id}", error_message: "Failed to get account info." ) do | res |
                     res.header.all.to_h
                 end
                 return nil if json_data.empty?
@@ -57,7 +57,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/swift-show_account_details_and_list_containers.html
             # @see https://developer.openstack.org/api-ref/object-store/?expanded=show-account-details-and-list-containers-detail#show-account-details-and-list-containers
             def get_conatiner_list( newest: false, **url_query )
-                uri = URI.parse( "/nc_#{@identity.config.tenant_id}" )
+                uri = URI.parse( "/nc_#{@identity.tenant_id}" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
 
                 json_data = api_get(
@@ -90,7 +90,7 @@ module Nocoah
             # @see https://www.conoha.jp/vps/pricing/
             def set_quota( quota )
                 api_post(
-                    "/nc_#{@identity.config.tenant_id}",
+                    "/nc_#{@identity.tenant_id}",
                     opt_header: {
                         'X-Account-Meta-Quota-Giga-Bytes': quota
                     },
@@ -111,7 +111,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/object-store/?expanded=show-container-details-and-list-objects-detail#show-container-details-and-list-objects
             def get_container_info( container_name )
                 json_data = api_get(
-                    "/nc_#{@identity.config.tenant_id}/#{container_name}",
+                    "/nc_#{@identity.tenant_id}/#{container_name}",
                     error_message: "Failed to get container info (container_name: #{container_name})."
                 ) do | res |
                     res.header.all.to_h
@@ -139,7 +139,7 @@ module Nocoah
             # @see https://www.conoha.jp/docs/swift-show_container_details_and_list_objects.html
             # @see https://developer.openstack.org/api-ref/object-store/?expanded=show-container-details-and-list-objects-detail#show-container-details-and-list-objects
             def get_object_list( container_name, newest: false, **url_query )
-                uri = URI.parse( "/nc_#{@identity.config.tenant_id}/#{container_name}" )
+                uri = URI.parse( "/nc_#{@identity.tenant_id}/#{container_name}" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
 
                 json_data = api_get(
@@ -169,7 +169,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/object-store/?expanded=create-container-detail#create-container
             def create_container( container_name )
                 api_put(
-                    "/nc_#{@identity.config.tenant_id}/#{container_name}",
+                    "/nc_#{@identity.tenant_id}/#{container_name}",
                     error_message: "Failed to create container. (container_name: #{container_name})"
                 ) do | res |
                     container_name
@@ -184,7 +184,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/object-store/?expanded=delete-container-detail#delete-container
             def delete_container( container_name )
                 api_delete(
-                    "/nc_#{@identity.config.tenant_id}/#{container_name}",
+                    "/nc_#{@identity.tenant_id}/#{container_name}",
                     error_message: "Failed to delete container. (container_name: #{container_name})"
                 ) do | res |
                     container_name
@@ -203,7 +203,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/object-store/?expanded=show-object-metadata-detail#show-object-metadata
             def get_object_info( container_name, object_name )
                 json_data = api_get(
-                    "/nc_#{@identity.config.tenant_id}/#{container_name}/#{object_name}",
+                    "/nc_#{@identity.tenant_id}/#{container_name}/#{object_name}",
                     error_message: "Failed to get object info (container_name: #{container_name}, object_name: #{object_name})."
                 ) do | res |
                     res.header.all.to_h
@@ -228,7 +228,7 @@ module Nocoah
             def upload_object( object_file_path, content_type: nil, container_name:, object_name: nil )
                 object_name ||= File.basename( object_file_path )
                 api_put(
-                    "/nc_#{@identity.config.tenant_id}/#{container_name}/#{object_name}",
+                    "/nc_#{@identity.tenant_id}/#{container_name}/#{object_name}",
                     opt_header: content_type.nil? ? {} : { 'Content-Type': content_type },
                     body: File.open( object_file_path ),
                     error_message: "Failed to upload object (object_file_path: #{object_file_path}, content_type: #{content_type}, container_name: #{container_name}, object_name: #{object_name})."
@@ -251,7 +251,7 @@ module Nocoah
             def download_object( container_name, object_name, output_file_path: )
                 File.open( output_file_path, "wb" ) do | file |
                     api_get_content(
-                        "/nc_#{@identity.config.tenant_id}/#{container_name}/#{object_name}",
+                        "/nc_#{@identity.tenant_id}/#{container_name}/#{object_name}",
                         error_message: "Failed to download object (container_name: #{container_name}, object_name: #{object_name}, output_file_path: #{output_file_path})."
                     ) do | chunk |
                         file.write( chunk )
@@ -273,7 +273,7 @@ module Nocoah
             # @see https://developer.openstack.org/api-ref/object-store/?expanded=get-object-content-and-metadata-detail,delete-object-detail#delete-object
             def delete_object( container_name, object_name )
                 api_delete(
-                    "/nc_#{@identity.config.tenant_id}/#{container_name}/#{object_name}",
+                    "/nc_#{@identity.tenant_id}/#{container_name}/#{object_name}",
                     error_message: "Failed to delete object (container_name: #{container_name}, object_name: #{object_name})."
                 ) do | res |
                     object_name

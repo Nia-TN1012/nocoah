@@ -31,6 +31,14 @@ module Nocoah
 
             end
 
+            # Image type
+            module ImageType
+                # Snapshot
+                SNAPSHOT = "snapshot"
+                # Backup
+                BACKUP = "backup"
+            end
+
         end
 
     end

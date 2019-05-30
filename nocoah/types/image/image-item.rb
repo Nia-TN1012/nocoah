@@ -80,6 +80,45 @@ module Nocoah
 
             end
 
+            # Visibility
+            module Visibility
+                # Public
+                PUBLIC = "public"
+                # Private
+                PRIVATE = "private"
+                # Community
+                COMMUNITY = "community"
+                # Shared
+                SHARED = "shared"
+            end
+
+            # Sort key of Image
+            module SortKeyImage
+                # Sort by Image ID
+                ID = "id"
+                # Sort by Image name
+                NAME = "name"
+                # Sort by Created date
+                CREATED_AT = "created_at"
+                # Sort by Updated date
+                UPDATED_AT = "updated_at"
+            end
+
+            # Image status
+            #
+            # @see https://developer.openstack.org/api-ref/image/v2/index.html
+            module ImageStatus
+                QUEUED = "queued"
+                SAVING = "saving"
+                ACTIVE = "active"
+                KILLED = "killed"
+                DELETED = "deleted"
+                PENDING_DELETE = "pending_delete"
+                DEACTIVATED = "deactivated"
+                UPLOADING = "uploading"
+                IMPORTING = "importing"
+            end
+
         end
 
     end
