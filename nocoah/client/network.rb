@@ -59,10 +59,21 @@ module Nocoah
             # @return [Nocoah::Types::Network::NetworkItem]     When succeeded, created network item.
             # @raise [Nocoah::APIError]                         When failed.
             #
+            # @example Creates a private network (CIDR: 10.0.1.0/24 (10.0.0.1 ~ 10.0.0.254)) ( This is the same operation as creating a private network from ConoHa's control panel. )
+            #   nw = create_network
+            #   create_subnet(
+            #       nw.network_id,
+            #       cidr: "10.0.0.0/24"
+            #   )
+            #
+            # @see create_subnet
             # @see https://www.conoha.jp/docs/neutron-add_network.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=create-network-detail#create-network
             def create_network
-                json_data = api_post( "/networks", error_message: "Failed to create network." )
+                json_data = api_post(
+                    "/networks",
+                    error_message: "Failed to create network."
+                )
                 return nil unless json_data.key?( 'network' )
 
                 Types::Network::NetworkItem.new( json_data['network'] )
@@ -274,13 +285,21 @@ module Nocoah
             # Creates a new subnet.
             #
             # @param [String] network_id        Network ID
-            # @param [String] cidr              CIDR
+            # @param [String] cidr              CIDR ( e.g. "10.xxx.xxx.xxx/xx", "172.xx.xxx.xxx/xx", "192.168.xxx.xxx/xx" )
             #
             # @return [Nocoah::Types::Network::SubnetItem]      When succeeded, created subnet item.
             # @raise [Nocoah::APIError]                         When failed.
             #
-            # @note ConoHa: Creates subnet for local network.
+            # @note ConoHa: Creates a subnet for the local network. You can specify 21 to 27 for the bitmask.
             #
+            # @example Creates a private network (CIDR: 10.0.1.0/24 (10.0.0.1 ~ 10.0.0.254)) ( This is the same operation as creating a private network from ConoHa's control panel. )
+            #   nw = create_network
+            #   create_subnet(
+            #       nw.network_id,
+            #       cidr: "10.0.0.0/24"
+            #   )
+            #
+            # @see create_network
             # @see https://www.conoha.jp/docs/neutron-add_subnet.html
             # @see https://developer.openstack.org/api-ref/network/v2/index.html?expanded=create-subnet-detail#create-subnet
             def create_subnet( network_id, cidr: )
@@ -301,10 +320,10 @@ module Nocoah
 
             # Purchases for an additional IP address and creates a new subnet.
             #
-            # @param [Integer] bitmask      Bit mask (Default: 32) (ConoHa: 28..32) ( This parameter takes precedence. )
-            # @param [Integer] add_num      Number of purchase and create IPs (Default: 1) (ConoHa: 1, 2, 4, 8, 16)
+            # @param [Integer] bitmask      Bit mask (Default: 32) ( This parameter takes precedence. )
+            # @param [Integer] add_num      Number of purchase and create IPs (Default: 1)
             #
-            # @note ConoHa: The minimum usage period for additional IP addresses is 30 days.
+            # @note ConoHa: The minimum usage period for additional IP addresses is 30 days. You can specify 28 to 32 for the bitmask.
             #
             # @return [Nocoah::Types::Network::SubnetItem]      When succeeded, created subnet item.
             # @raise [Nocoah::ArgumentError]                    When specified or calculated ( from add_num ) bitmask is invalid.

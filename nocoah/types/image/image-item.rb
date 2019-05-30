@@ -24,7 +24,7 @@ module Nocoah
                 attr_reader :tags
                 # @return [String] Container format
                 attr_reader :container_format
-                # @return [Datetime] Created time
+                # @return [Datetime] Created date
                 attr_reader :created_at
                 # @return [Integer] Image size (byte)
                 attr_reader :size
@@ -81,6 +81,8 @@ module Nocoah
             end
 
             # Visibility
+            #
+            # @see https://developer.openstack.org/api-ref/image/v2/index.html
             module Visibility
                 # Public
                 PUBLIC = "public"
@@ -108,14 +110,23 @@ module Nocoah
             #
             # @see https://developer.openstack.org/api-ref/image/v2/index.html
             module ImageStatus
+                # Queued
                 QUEUED = "queued"
+                # Saving
                 SAVING = "saving"
+                # Active
                 ACTIVE = "active"
+                # Killed
                 KILLED = "killed"
+                # Deleted
                 DELETED = "deleted"
+                # Pending delete
                 PENDING_DELETE = "pending_delete"
+                # Deactivated
                 DEACTIVATED = "deactivated"
+                # Uploading
                 UPLOADING = "uploading"
+                # Importing
                 IMPORTING = "importing"
             end
 

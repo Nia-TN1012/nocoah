@@ -27,9 +27,9 @@ module Nocoah
 
         # Initializes a new Config instance.
         #
-        # @param          [Hash]            options             Options
-        # @option options [String]          :config_file_path   The JSON file path that describes the credential configuration information of ConoHa API account
-        # @option options [Hash]            :api_account        The hash object that stores ConoHa API user, password, tenant ID, and region.
+        # @param          [Hash]    options                 Options
+        # @option options [String]  :config_file_path       The JSON file path that describes the credential configuration information of ConoHa API account
+        # @option options [Hash]    :api_account            The hash object that stores ConoHa API user, password, tenant ID, and region.
         #
         # @note
         #   Priority:
