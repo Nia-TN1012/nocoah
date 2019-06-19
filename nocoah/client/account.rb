@@ -30,7 +30,7 @@ module Nocoah
             #
             # @see get_order_item_detail
             # @see https://www.conoha.jp/docs/account-order-item-list.html
-            def get_order_items_list( **filters )
+            def get_order_item_list( **filters )
                 raise ArgumentError, "sort_key '#{filters[:sort_key]}' is invalid." if filters.key?( :sort_key ) && !Types::Account::SortKeyOrderItem.validate_key( filters[:sort_key] )
                 
                 json_data = api_get( "/#{@identity.tenant_id}/order-items", error_message: "Failed to get order-item list." )
@@ -57,7 +57,7 @@ module Nocoah
                 order_item_list
             end
 
-            # Gets a ordered items info.
+            # Gets a ordered item.
             #
             # @param [String] item_id       Item ID
             #
@@ -114,7 +114,7 @@ module Nocoah
             #
             # @see get_billing_invoice_detail
             # @see https://www.conoha.jp/docs/account-billing-invoices-list.html
-            def get_billing_invoices_list( **url_query )
+            def get_billing_invoice_list( **url_query )
                 uri = URI.parse( "/#{@identity.tenant_id}/billing-invoices" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
 
@@ -126,7 +126,7 @@ module Nocoah
                 end
             end
 
-            # Gets a billing invoice detail list.
+            # Gets a billing invoice detail.
             #
             # @param [String] invoice_id   Invoice ID
             #
@@ -155,7 +155,7 @@ module Nocoah
             #
             # @see get_notification_item
             # @see https://www.conoha.jp/docs/account-informations-list.html
-            def get_notifications_list( **url_query )
+            def get_notification_list( **url_query )
                 uri = URI.parse( "/#{@identity.tenant_id}/notifications" )
                 uri.query = URI.encode_www_form( url_query ) if !url_query.empty?
 
@@ -217,6 +217,7 @@ module Nocoah
             # @return [Nocoah::Types::Common::RRD]      When succeeded, object storage request utilization rrd.
             # @raise [Nocoah::APIError]                 When failed.
             #
+            # @see get_object_storage_size_rrd
             # @see https://www.conoha.jp/docs/account-get_objectstorage_request_rrd.html
             def get_object_storage_request_rrd( **url_query )
                 get_object_storage_rrd_core( "request", url_query )
@@ -234,6 +235,7 @@ module Nocoah
             # @return [Nocoah::Types::Common::RRD]      When succeeded, object storage size utilization rrd.
             # @raise [Nocoah::APIError]                 When failed.
             #
+            # @see get_object_storage_request_rrd
             # @see https://www.conoha.jp/docs/account-get_objectstorage_size_rrd.html
             def get_object_storage_size_rrd( **url_query )
                 get_object_storage_rrd_core( "size", url_query )
